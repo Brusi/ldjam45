@@ -36,3 +36,6 @@ static func clamp_to_rect(vec:Vector2, rect:Rect2):
 	return Vector2(
 			clamp(vec.x, rect.position.x, rect.position.x + rect.size.x),
 			clamp(vec.y, rect.position.y, rect.position.y + rect.size.y))
+			
+static func bernoulli(x:float):
+	return randf() < x

@@ -5,10 +5,31 @@ signal done_expanding(expanded)
 var bfs_discovered: = {}
 var expanded: = {}
 var started: = false
+var done: = false
 
 func _ready():
 	pass
 	# start();
+	
+func check_finish() -> void:
+	if not done:
+		return
+
+	for white in get_tree().get_nodes_in_group("whites"):
+		if (white as Sprite).modulate.a < 1:
+			# Not all whites appeared yet.
+			return
+		
+	for white in get_tree().get_nodes_in_group("whites"):
+		white.queue_free()
+		
+	emit_signal("done_expanding", expanded)
+	
+	done = false
+	started = false
+	
+func _process(delta):
+	check_finish()
 	
 func try_find_circle(corners:Array) -> bool:
 	var queue: = [Vector2(0,0)]
@@ -50,12 +71,14 @@ func expand_to(coords:Vector2) -> bool:
 		
 	# If has a wall, mark as expanded so we do not expand again.
 	expanded[coords] = $"../Env".has_wall(coords)
-	add_white(coords)
+	if not expanded[coords]:
+		add_white(coords)
 	return true
 	
 func add_white(coords:Vector2):
 	var white:Sprite = preload("res://White.tscn").instance()
 	white.position = Env.coords_to_pos(coords)
+	# add_child(white)
 	add_child(white)
 
 func expand() -> bool:
@@ -78,10 +101,4 @@ func _on_ExpandTimer_timeout():
 		return
 	
 	started = false
-	
-	for child in get_children():
-		if child is Sprite:
-			child.queue_free()
-	
-	emit_signal("done_expanding", expanded)
-		
+	done = true

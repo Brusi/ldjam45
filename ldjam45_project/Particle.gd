@@ -1,8 +1,6 @@
 extends Node2D
 
-class_name Coin
-
-signal timed_out
+class_name Particle
 
 const GRAVITY = 300
 
@@ -12,11 +10,23 @@ var vel: = Vector2()
 var vel_z: = 0.0
 var z: = 0.0
 
+var IDLE_TIME: = 2.0
+
 # Called when the node enters the scene tree for the first time.
 func _ready():
-	vel_z = rand_range(100, 150)
+	$Sprite.position.y = -z + 0
 	pass # Replace with function body.
-
+	
+func init(init_pos:Vector2, color:Color = Color.white):
+	position = init_pos + Utils.rand_dir() * rand_range(2,6)
+	position.y -= 0
+	vel = Utils.rand_dir() * rand_range(10, 40)
+	vel.y /= 2
+	vel_z = rand_range(40, 100)
+	
+	modulate = color
+	
+	
 func _process(delta):
 	vel_z -= GRAVITY * delta
 	z += vel_z * delta
@@ -27,17 +37,14 @@ func _process(delta):
 		vel =  vel * 0.5
 	
 	position += vel * delta
-	$Sprite.position.y = -z
+	$Sprite.position.y = -z + 0
+	
+	if vel.length() < 0.1:
+		modulate.a = max(0,modulate.a - delta/IDLE_TIME)
+		if modulate.a <= 0:
+			queue_free()
+		
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 #func _process(delta):
 #	pass
-
-func _on_TimeoutTimer_timeout():
-	queue_free()
-
-func _on_StartBlinkTimer_timeout():
-	$BlinkTimer.start()
-
-func _on_BlinkTimer_timeout():
-	$Sprite.visible = not $Sprite.visible
