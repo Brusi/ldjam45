@@ -1,0 +1,99 @@
+[gd_scene load_steps=13 format=2]
+
+[ext_resource path="res://Game.gd" type="Script" id=1]
+[ext_resource path="res://Env.gd" type="Script" id=2]
+[ext_resource path="res://Exploder.gd" type="Script" id=3]
+[ext_resource path="res://Player.gd" type="Script" id=4]
+[ext_resource path="res://assets/player.png" type="Texture" id=5]
+[ext_resource path="res://assets/target.png" type="Texture" id=6]
+[ext_resource path="res://Target.gd" type="Script" id=7]
+[ext_resource path="res://Camera.gd" type="Script" id=8]
+[ext_resource path="res://assets/base.png" type="Texture" id=9]
+[ext_resource path="res://Spawner.gd" type="Script" id=10]
+[ext_resource path="res://assets/font/CompassPro.ttf" type="DynamicFontData" id=11]
+
+[sub_resource type="DynamicFont" id=1]
+size = 32
+font_data = ExtResource( 11 )
+
+[node name="Game" type="YSort"]
+script = ExtResource( 1 )
+
+[node name="Env" type="Node2D" parent="."]
+script = ExtResource( 2 )
+
+[node name="Exploder" type="Node2D" parent="."]
+pause_mode = 2
+script = ExtResource( 3 )
+
+[node name="ExpandTimer" type="Timer" parent="Exploder"]
+pause_mode = 2
+wait_time = 0.1
+one_shot = true
+
+[node name="Player" type="Node2D" parent="."]
+script = ExtResource( 4 )
+
+[node name="Sprite" type="Sprite" parent="Player"]
+texture = ExtResource( 5 )
+
+[node name="Target" type="Sprite" parent="."]
+texture = ExtResource( 6 )
+script = ExtResource( 7 )
+
+[node name="Camera" type="Camera2D" parent="."]
+current = true
+smoothing_enabled = true
+drag_margin_left = 0.0
+drag_margin_top = 0.0
+drag_margin_right = 0.0
+drag_margin_bottom = 0.0
+script = ExtResource( 8 )
+
+[node name="ScreenShakeTimer" type="Timer" parent="Camera"]
+wait_time = 0.2
+one_shot = true
+
+[node name="ShotsTimer" type="Timer" parent="."]
+process_mode = 0
+wait_time = 0.3
+one_shot = true
+autostart = true
+
+[node name="Base" type="Sprite" parent="."]
+texture = ExtResource( 9 )
+
+[node name="Spawner" type="Node" parent="."]
+script = ExtResource( 10 )
+
+[node name="Timer" type="Timer" parent="Spawner"]
+wait_time = 4.0
+autostart = true
+
+[node name="NewWaveTimer" type="Timer" parent="Spawner"]
+
+[node name="PauseEffectTimer" type="Timer" parent="."]
+pause_mode = 2
+wait_time = 0.05
+
+[node name="UI" type="CanvasLayer" parent="."]
+
+[node name="Control" type="Control" parent="UI"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+
+[node name="Label" type="Label" parent="UI/Control"]
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+margin_top = -33.0
+margin_bottom = -19.0
+custom_fonts/font = SubResource( 1 )
+custom_colors/font_color = Color( 0, 0, 0, 1 )
+align = 1
+[connection signal="done_expanding" from="Exploder" to="." method="_on_Exploder_done_expanding"]
+[connection signal="timeout" from="Exploder/ExpandTimer" to="Exploder" method="_on_ExpandTimer_timeout"]
+[connection signal="timeout" from="Camera/ScreenShakeTimer" to="Camera" method="_on_ScreenShakeTimer_timeout"]
+[connection signal="spawned" from="Spawner" to="." method="_on_Spawner_spawned"]
+[connection signal="timeout" from="Spawner/Timer" to="Spawner" method="_on_Timer_timeout"]
+[connection signal="timeout" from="PauseEffectTimer" to="." method="_on_PauseEffectTimer_timeout"]
