@@ -2,15 +2,15 @@
 
 importer="texture"
 type="StreamTexture"
-path="res://.import/target.png-52c019dda84da6fc854650719104c4ec.stex"
+path="res://.import/gargoyle_back.png-e0bc737fa716922a2f484ae8f11f8cfa.stex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/target.png"
-dest_files=[ "res://.import/target.png-52c019dda84da6fc854650719104c4ec.stex" ]
+source_file="res://assets/gargoyle_back.png"
+dest_files=[ "res://.import/gargoyle_back.png-e0bc737fa716922a2f484ae8f11f8cfa.stex" ]
 
 [params]
 

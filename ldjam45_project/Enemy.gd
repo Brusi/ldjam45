@@ -74,6 +74,14 @@ func destroy():
 	
 func destroy_no_wall():
 	emit_signal("destroyed_no_wall", self)
+	
+func _process(delta:float):
+	if vel.y > 0:
+		$Back.visible = false
+		$Front.visible = true
+	else:
+		$Front.visible = false
+		$Back.visible = true
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 #func _process(delta):

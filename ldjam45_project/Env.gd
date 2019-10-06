@@ -2,7 +2,7 @@ extends Node2D
 
 class_name Env
 
-const SIZE = 16;
+const SIZE = 20;
 
 # Dictionary from Pos to Node.
 var tiles = {}
@@ -58,7 +58,7 @@ func add_wall(coords:Vector2):
 	
 	var wall: = preload("res://Wall.tscn").instance()
 	wall.position = coords_to_pos(coords)
-	add_child(wall)
+	$"..".add_child(wall)
 	tiles[coords] = wall;
 	return wall
 	
@@ -70,11 +70,11 @@ func remove_wall(p:Vector2):
 
 	
 static func pos_to_coords(vec:Vector2) -> Vector2:
-	var p: = Vector2(int(round(vec.x / 16)), int(round(vec.y / 16)))
+	var p: = Vector2(int(round(vec.x / SIZE)), int(round(vec.y / SIZE)))
 	return p
 
 static func coords_to_pos(p:Vector2) -> Vector2:
-	return Vector2(p.x, p.y) * 16;
+	return Vector2(p.x, p.y) * SIZE;
 
 const MAX_OPEN_SET: = 1000
 const INFINITY: = 1000000
