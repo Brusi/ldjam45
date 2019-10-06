@@ -1,6 +1,6 @@
 extends Node2D
 
-const EXPLODE_RANGE = 20
+const EXPLODE_RANGE = 10
 const SHOT_RADIUS = 16
 
 const WALL_COLORS = [Color("6d6b83"), Color("bebcd4"), Color("a3a1b7"), Color("807e96")]
@@ -43,7 +43,7 @@ func _process(event):
 		get_tree().reload_current_scene()
 		
 	if Input.is_key_pressed(KEY_Q):
-		$Env.init_stam()
+		$Env.add_wall(Env.pos_to_coords($Target.position))
 		
 	if get_enemies().empty():
 		$Spawner.no_enemies()
@@ -71,10 +71,20 @@ func _physics_process(delta):
 		return
 	
 	for enemy in get_enemies():
+		if enemy.is_destroyed:
+			continue
 		for shot in shots:
 			if (enemy.position - shot.position).length() < SHOT_RADIUS:
 				enemy.destroy()
 				shot.destroy()
+				
+				# Destroy other enemies which are near shot
+				for enemy2 in get_enemies():
+					if enemy2 == enemy:
+						continue
+					if (enemy2.position - shot.position).length() < SHOT_RADIUS * 1.5:
+						enemy2.destroy_no_wall()
+				continue
 				
 	for enemy in get_tree().get_nodes_in_group("enemies"):
 		if enemy.is_destroyed:
@@ -133,25 +143,28 @@ func check_circle():
 	
 func _on_Enemy_destroyed(enemy):
 	$Env.add_wall_at(enemy.position)
-	# create_particles(enemy.position, ENEMY_COLORS, 100)
-	_on_Enemy_destroyed_no_wall(enemy)
-	
-
-func _on_Enemy_destroyed_no_wall(enemy):
+	for coin in get_coins():
+		if Env.pos_to_coords(coin.position) == Env.pos_to_coords(enemy.position):
+			create_particles(coin.position, GEM_COLORS, 30)
+			coin.queue_free()
+			
 	enemy.queue_free()
-	
+			
 	if check_circle():
 		return
 	
 	$Camera.screen_shake()
 	pause_effect()
 	
-	
 	for e in get_tree().get_nodes_in_group("enemies"):
 		if e == enemy or Env.pos_to_coords(e.position) == Env.pos_to_coords(enemy.position):
 			continue
 		e.calc_path()
-		
+	
+func _on_Enemy_destroyed_no_wall(enemy):
+	create_particles(enemy.position, ENEMY_COLORS, 100)
+	enemy.queue_free()
+
 func _on_Enemy_reached_center(enemy):
 	check_lose()
 	# enemy.queue_free()
@@ -183,12 +196,12 @@ func _on_PauseEffectTimer_timeout():
 
 func _on_Exploder_done_expanding(expanded:Dictionary):
 	for coords in expanded.keys():
-		if expanded[coords]:
+		if $Env.has_wall(coords):
 			create_coin(Env.coords_to_pos(coords))
 			$Env.remove_wall(coords)
 			create_particles(Env.coords_to_pos(coords), WALL_COLORS, 30)
 			
-			
+	$Spawner.next_level()
 	
 	get_tree().paused = false
 	

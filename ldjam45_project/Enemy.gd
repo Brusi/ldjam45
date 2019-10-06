@@ -69,10 +69,15 @@ func coords() -> Vector2:
 	return Env.pos_to_coords(position)
 	
 func destroy():
+	if is_destroyed:
+		return
 	is_destroyed = true
 	emit_signal("destroyed", self)
 	
 func destroy_no_wall():
+	if is_destroyed:
+		return
+	is_destroyed = true
 	emit_signal("destroyed_no_wall", self)
 	
 func _process(delta:float):

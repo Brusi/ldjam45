@@ -4,6 +4,7 @@ signal done_expanding(expanded)
 
 var bfs_discovered: = {}
 var expanded: = {}
+var closed: = {}
 var started: = false
 var done: = false
 
@@ -23,7 +24,7 @@ func check_finish() -> void:
 	for white in get_tree().get_nodes_in_group("whites"):
 		white.queue_free()
 		
-	emit_signal("done_expanding", expanded)
+	emit_signal("done_expanding", bfs_discovered)
 	
 	done = false
 	started = false
@@ -59,10 +60,13 @@ func start():
 	
 	started = true
 	
-	expanded = {}
-	expand_to(Vector2.ZERO)
-	expand()
-	$ExpandTimer.start()
+	for coords in bfs_discovered:
+		if not $"../Env".has_wall(coords):
+			add_white(coords)
+	done = true
+	
+	#expanded = {}
+	#_on_ExpandTimer_timeout()
 
 func expand_to(coords:Vector2) -> bool:
 	if expanded.has(coords) or not bfs_discovered.has(coords):
@@ -83,6 +87,8 @@ func add_white(coords:Vector2):
 
 func expand() -> bool:
 	var did_expand: = false
+	if expand_to(Vector2.ZERO):
+		did_expand = true
 	for coords in expanded.keys():
 		if expanded[coords]:
 			continue

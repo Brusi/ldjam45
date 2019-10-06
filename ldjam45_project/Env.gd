@@ -57,6 +57,9 @@ func add_wall_at(pos:Vector2):
 	wall.position = pos
 	
 func add_wall(coords:Vector2):
+	if coords == Vector2.ZERO:
+		return
+
 	if tiles.has(coords):
 		return
 	

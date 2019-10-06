@@ -25,6 +25,7 @@ script = ExtResource( 1 )
 script = ExtResource( 2 )
 
 [node name="Env" type="Node2D" parent="."]
+pause_mode = 2
 script = ExtResource( 3 )
 
 [node name="Exploder" type="Node2D" parent="."]
