@@ -61,7 +61,7 @@ func check_lose() -> bool:
 			$Camera.screen_shake(3)
 			$Player.disable()
 			set_label("You lost! Hit R to restart.")
-			$UI/Control/Score.text = "Gens: "+String(coins_collected)
+			show_score()
 			return true
 			
 	return false
@@ -82,7 +82,7 @@ func _physics_process(delta):
 				for enemy2 in get_enemies():
 					if enemy2 == enemy:
 						continue
-					if (enemy2.position - shot.position).length() < SHOT_RADIUS * 1.5:
+					if enemy.position.distance_to(enemy2.position) < Env.SIZE:
 						enemy2.destroy_no_wall()
 				continue
 				
@@ -100,17 +100,23 @@ func _physics_process(delta):
 			coin_taken(coin)
 			pause_effect(0.05)
 			
+func show_score():
+	$UI/Control/ScoreView.visible = true
+	$UI/Control/ScoreView/Score.text = "x "+String(coins_collected)
+	$UI/Control/ScoreView/ScoreTimer.stop()
+	
 
 func coin_taken(coin):
 	coins_collected += 1
-	$UI/Control/Score.text = "Gems: "+String(coins_collected)
-	$UI/Control/Score/ScoreTimer.start()
-	create_particles(coin.position, GEM_COLORS, 30)
+	show_score()
+	$UI/Control/ScoreView/ScoreTimer.start()
+	# create_particles(coin.position, GEM_COLORS, 30)
 	coin.queue_free()
 	
-func create_enemy(init_pos:Vector2, moving:bool):
+func create_enemy(init_pos:Vector2, stationary:bool):
 	var enemy:Enemy = preload("res://Enemy.tscn").instance()
 	enemy.position = init_pos
+	enemy.stationary = stationary
 	enemy.connect("destroyed", self, "_on_Enemy_destroyed")
 	enemy.connect("destroyed_no_wall", self, "_on_Enemy_destroyed_no_wall")
 	enemy.connect("reached_center", self, "_on_Enemy_reached_center")
@@ -172,10 +178,10 @@ func _on_Enemy_reached_center(enemy):
 func _on_Enemy_blocked(enemy):
 	pass
 
-func _on_Spawner_spawned(pos:Vector2, moving:bool):
+func _on_Spawner_spawned(pos:Vector2, stationary:bool):
 	if lost:
 		return
-	create_enemy(pos, moving)
+	create_enemy(pos, stationary)
 
 func pause_effect(wait_time: = 0.1):
 	$PauseEffectTimer.start(wait_time)
@@ -218,4 +224,13 @@ func _on_Exploder_done_expanding(expanded:Dictionary):
 
 
 func _on_ScoreTimer_timeout():
-	$UI/Control/Score.text = ""
+	$UI/Control/ScoreView.visible = false
+
+
+func _on_Tutorial_set_label(text):
+	set_label(text)
+
+
+func _on_Tutorial_spawn_enemy(coords, stationary):
+	create_enemy(Env.coords_to_pos(coords), stationary)
+	pass # Replace with function body.

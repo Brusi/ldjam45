@@ -3,8 +3,8 @@ extends Node2D
 export var on_top_offset: = -10000.0
 
 export var size: = 15
-export var large_chance: = 0.3
-export var empty_chance: = 0.4
+export var large_chance: = 0.02#0.3
+export var empty_chance: = 0.8#0.4
 
 var used: = {}
 

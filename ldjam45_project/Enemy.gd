@@ -7,7 +7,8 @@ signal destroyed_no_wall(enemy)
 signal reached_center(enemy)
 signal blocked(enemy)
 
-export var speed: = 1
+export var speed: = 0.5
+export var stationary: = false
 
 var path: = []
 
@@ -28,7 +29,7 @@ func stop() -> void:
 	stopped = true
 	
 func calc_path() -> void:
-	if stopped:
+	if stationary or stopped:
 		return
 		
 	calculating = true
@@ -44,7 +45,7 @@ func calc_path() -> void:
 		aggressive_mode = true
 
 func _physics_process(delta):
-	if stopped or calculating:
+	if stationary or stopped or calculating:
 		return
 		
 	if aggressive_mode:
@@ -81,6 +82,12 @@ func destroy_no_wall():
 	emit_signal("destroyed_no_wall", self)
 	
 func _process(delta:float):
+	if stationary:
+		$Back.visible = false
+		$Front.visible = false
+		$Idle.visible = true
+		return
+	
 	if vel.y > 0:
 		$Back.visible = false
 		$Front.visible = true

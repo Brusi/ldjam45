@@ -1,4 +1,4 @@
-[gd_scene load_steps=15 format=2]
+[gd_scene load_steps=16 format=2]
 
 [ext_resource path="res://Game.gd" type="Script" id=1]
 [ext_resource path="res://Floor.gd" type="Script" id=2]
@@ -12,7 +12,8 @@
 [ext_resource path="res://assets/base.png" type="Texture" id=10]
 [ext_resource path="res://Spawner.gd" type="Script" id=11]
 [ext_resource path="res://assets/font/CompassPro.ttf" type="DynamicFontData" id=12]
-[ext_resource path="res://Particle.tscn" type="PackedScene" id=13]
+[ext_resource path="res://assets/gem.png" type="Texture" id=13]
+[ext_resource path="res://Particle.tscn" type="PackedScene" id=14]
 
 [sub_resource type="DynamicFont" id=1]
 size = 32
@@ -84,7 +85,6 @@ pause_mode = 2
 wait_time = 0.05
 
 [node name="UI" type="CanvasLayer" parent="."]
-editor/display_folded = true
 
 [node name="Control" type="Control" parent="UI"]
 anchor_right = 1.0
@@ -100,22 +100,34 @@ custom_fonts/font = SubResource( 1 )
 custom_colors/font_color = Color( 0, 0, 0, 1 )
 align = 1
 
-[node name="Score" type="Label" parent="UI/Control"]
+[node name="ScoreView" type="Control" parent="UI/Control"]
+visible = false
 anchor_right = 1.0
-margin_bottom = 30.0
+anchor_bottom = 1.0
+
+[node name="Score" type="Label" parent="UI/Control/ScoreView"]
+margin_left = 53.2635
+margin_top = 11.7365
+margin_right = 453.264
+margin_bottom = 41.7365
 custom_fonts/font = SubResource( 1 )
 custom_colors/font_color = Color( 0, 0, 0, 1 )
-align = 1
+text = "x 10"
 
-[node name="ScoreTimer" type="Timer" parent="UI/Control/Score"]
+[node name="ScoreTimer" type="Timer" parent="UI/Control/ScoreView"]
 wait_time = 3.0
 one_shot = true
 
-[node name="Particle" parent="." instance=ExtResource( 13 )]
+[node name="Sprite" type="Sprite" parent="UI/Control/ScoreView"]
+position = Vector2( 30, 30 )
+scale = Vector2( 3, 3 )
+texture = ExtResource( 13 )
+
+[node name="Particle" parent="." instance=ExtResource( 14 )]
 [connection signal="done_expanding" from="Exploder" to="." method="_on_Exploder_done_expanding"]
 [connection signal="timeout" from="Exploder/ExpandTimer" to="Exploder" method="_on_ExpandTimer_timeout"]
 [connection signal="timeout" from="Camera/ScreenShakeTimer" to="Camera" method="_on_ScreenShakeTimer_timeout"]
 [connection signal="spawned" from="Spawner" to="." method="_on_Spawner_spawned"]
 [connection signal="timeout" from="Spawner/Timer" to="Spawner" method="_on_Timer_timeout"]
 [connection signal="timeout" from="PauseEffectTimer" to="." method="_on_PauseEffectTimer_timeout"]
-[connection signal="timeout" from="UI/Control/Score/ScoreTimer" to="." method="_on_ScoreTimer_timeout"]
+[connection signal="timeout" from="UI/Control/ScoreView/ScoreTimer" to="." method="_on_ScoreTimer_timeout"]
