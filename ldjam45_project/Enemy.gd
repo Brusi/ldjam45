@@ -97,6 +97,7 @@ func hit() -> void:
 	hp -= 1
 	if hp == 0:
 		destroy()
+		SoundManager.play_random_sound(SoundManager.stoned)
 	else:
 		SoundManager.play_random_sound(SoundManager.hit)
 	modulate = Color.black

@@ -8,12 +8,19 @@ func _ready():
 	
 func set_type(value:int):
 	type = value
-	if type == 0:
-		$Normal.visible = true
-		$Big.visible = false
-	else:
-		$Normal.visible = false
-		$Big.visible = true
+	match type:
+		0:
+			$Normal.visible = true
+			$Big.visible = false
+			$Thin.visible = false
+		1:
+			$Normal.visible = false
+			$Big.visible = true
+			$Thin.visible = false
+		2:
+			$Normal.visible = false
+			$Big.visible = false
+			$Thin.visible = true
 
 
 func _on_AnimatedSprite_animation_finished():

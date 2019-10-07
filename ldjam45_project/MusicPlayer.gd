@@ -27,6 +27,7 @@ func _play_current():
 	if $Stream.is_playing():
 		return
 	$Stream.stream = current_music
+	$Stream.volume_db = -5
 	$Stream.play()
 	
 func play_game_music():

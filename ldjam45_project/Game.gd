@@ -50,7 +50,7 @@ func _process(event):
 			get_tree().change_scene("res://Game.tscn")
 		else :
 			get_tree().reload_current_scene()
-	if Input.is_key_pressed(KEY_Q):
+	if Input.is_key_pressed(KEY_COMMA):
 		$Env.add_wall(Env.pos_to_coords($Target.position))
 		
 	if get_enemies().empty():
@@ -67,6 +67,7 @@ func check_lose() -> bool:
 				enemy.stop()
 			lost = true
 			MusicPlayer.stop_game_music()
+			SoundManager.play_random_sound(SoundManager.death)
 			$Camera.screen_shake(3)
 			$Player.disable()
 			# set_label("You lost! [R] to restart.")
@@ -113,6 +114,7 @@ func _physics_process(delta):
 				if wall != null:
 					wall.position += shot.vel * 1
 				shot.destroy()
+				SoundManager.play_random_sound(SoundManager.hit)
 				continue
 			
 			if (enemy.position - shot.position).length() < SHOT_RADIUS:
@@ -154,6 +156,7 @@ func hide_score():
 	
 
 func coin_taken(coin):
+	SoundManager.play_random_sound(SoundManager.gem)
 	coins_collected += 1
 	show_score()
 	$UI/Control/ScoreView/ScoreTimer.start()
@@ -268,6 +271,7 @@ func create_wall_particles(pos:Vector2):
 		var p:Particle = preload("res://WallParticle.tscn").instance()
 		p.init(pos)
 		add_child(p)
+	SoundManager.play_random_sound(SoundManager.breaking)
 
 func _on_PauseEffectTimer_timeout():
 	get_tree().paused = false

@@ -55,6 +55,8 @@ func start():
 	if started:
 		return
 		
+	SoundManager.play_random_sound(SoundManager.circle)
+		
 	if not try_find_circle($"../Env".get_corners()):
 		return
 	

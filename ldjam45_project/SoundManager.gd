@@ -2,6 +2,11 @@ extends Node
 
 const fire = [preload("res://sound/fire.ogg")]
 const hit = [preload("res://sound/hit.ogg")]
+const stoned = [preload("res://sound/stoned_3.ogg")]
+const gem = [preload("res://sound/gem.ogg")]
+const circle = [preload("res://sound/circle.ogg")]
+const death = [preload("res://sound/death.ogg")]
+const breaking = [preload("res://sound/break_0.ogg"), preload("res://sound/break_1.ogg")]
 
 var streams: = {}
 
