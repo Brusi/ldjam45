@@ -1,23 +1,25 @@
-[gd_scene load_steps=16 format=2]
+[gd_scene load_steps=19 format=2]
 
 [ext_resource path="res://Game.gd" type="Script" id=1]
 [ext_resource path="res://Floor.gd" type="Script" id=2]
-[ext_resource path="res://Env.gd" type="Script" id=3]
-[ext_resource path="res://Exploder.gd" type="Script" id=4]
-[ext_resource path="res://Player.gd" type="Script" id=5]
-[ext_resource path="res://assets/player.png" type="Texture" id=6]
-[ext_resource path="res://assets/white.png" type="Texture" id=7]
-[ext_resource path="res://Target.gd" type="Script" id=8]
-[ext_resource path="res://Camera.gd" type="Script" id=9]
-[ext_resource path="res://assets/base.png" type="Texture" id=10]
-[ext_resource path="res://Spawner.gd" type="Script" id=11]
-[ext_resource path="res://assets/font/CompassPro.ttf" type="DynamicFontData" id=12]
-[ext_resource path="res://assets/gem.png" type="Texture" id=13]
-[ext_resource path="res://Particle.tscn" type="PackedScene" id=14]
+[ext_resource path="res://assets/stage.png" type="Texture" id=3]
+[ext_resource path="res://assets/stand.png" type="Texture" id=4]
+[ext_resource path="res://assets/orb.png" type="Texture" id=5]
+[ext_resource path="res://Orb.gd" type="Script" id=6]
+[ext_resource path="res://Env.gd" type="Script" id=7]
+[ext_resource path="res://Exploder.gd" type="Script" id=8]
+[ext_resource path="res://Player.tscn" type="PackedScene" id=9]
+[ext_resource path="res://assets/target.png" type="Texture" id=10]
+[ext_resource path="res://Target.gd" type="Script" id=11]
+[ext_resource path="res://Camera.gd" type="Script" id=12]
+[ext_resource path="res://Spawner.gd" type="Script" id=13]
+[ext_resource path="res://assets/ui/ui_tutorial.png" type="Texture" id=14]
+[ext_resource path="res://assets/font/CompassPro.ttf" type="DynamicFontData" id=15]
+[ext_resource path="res://assets/ui/ui_gems.png" type="Texture" id=16]
+[ext_resource path="res://assets/ui/gem_ui.png" type="Texture" id=17]
 
 [sub_resource type="DynamicFont" id=1]
-size = 20
-font_data = ExtResource( 12 )
+font_data = ExtResource( 15 )
 
 [node name="Game" type="YSort"]
 script = ExtResource( 1 )
@@ -25,29 +27,35 @@ script = ExtResource( 1 )
 [node name="Floor" type="Node2D" parent="."]
 script = ExtResource( 2 )
 
+[node name="Stage" type="Sprite" parent="Floor"]
+texture = ExtResource( 3 )
+
+[node name="Stand" type="Sprite" parent="Floor"]
+texture = ExtResource( 4 )
+
+[node name="Orb" type="Sprite" parent="."]
+texture = ExtResource( 5 )
+script = ExtResource( 6 )
+
 [node name="Env" type="Node2D" parent="."]
 pause_mode = 2
-script = ExtResource( 3 )
+script = ExtResource( 7 )
 
 [node name="Exploder" type="Node2D" parent="."]
 pause_mode = 2
-script = ExtResource( 4 )
+script = ExtResource( 8 )
 
 [node name="ExpandTimer" type="Timer" parent="Exploder"]
 pause_mode = 2
 wait_time = 0.1
 one_shot = true
 
-[node name="Player" type="Node2D" parent="."]
-script = ExtResource( 5 )
-
-[node name="Sprite" type="Sprite" parent="Player"]
-texture = ExtResource( 6 )
+[node name="Player" parent="." instance=ExtResource( 9 )]
+position = Vector2( 0, -20 )
 
 [node name="Target" type="Sprite" parent="."]
-scale = Vector2( 0.4, 0.4 )
-texture = ExtResource( 7 )
-script = ExtResource( 8 )
+texture = ExtResource( 10 )
+script = ExtResource( 11 )
 
 [node name="Camera" type="Camera2D" parent="."]
 current = true
@@ -56,7 +64,7 @@ drag_margin_left = 0.0
 drag_margin_top = 0.0
 drag_margin_right = 0.0
 drag_margin_bottom = 0.0
-script = ExtResource( 9 )
+script = ExtResource( 12 )
 
 [node name="ScreenShakeTimer" type="Timer" parent="Camera"]
 wait_time = 0.2
@@ -68,17 +76,12 @@ wait_time = 0.3
 one_shot = true
 autostart = true
 
-[node name="Base" type="Sprite" parent="."]
-texture = ExtResource( 10 )
-
 [node name="Spawner" type="Node" parent="."]
-script = ExtResource( 11 )
+script = ExtResource( 13 )
 
 [node name="Timer" type="Timer" parent="Spawner"]
 wait_time = 4.0
 autostart = true
-
-[node name="NewWaveTimer" type="Timer" parent="Spawner"]
 
 [node name="PauseEffectTimer" type="Timer" parent="."]
 pause_mode = 2
@@ -90,44 +93,64 @@ wait_time = 0.05
 anchor_right = 1.0
 anchor_bottom = 1.0
 
+[node name="HintRect" type="TextureRect" parent="UI/Control"]
+visible = false
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+margin_left = -84.0
+margin_top = -47.0
+margin_right = 84.0
+margin_bottom = -8.0
+texture = ExtResource( 14 )
+
 [node name="Label" type="Label" parent="UI/Control"]
 anchor_top = 1.0
 anchor_right = 1.0
 anchor_bottom = 1.0
-margin_top = -33.0
-margin_bottom = -19.0
+margin_top = -47.0
+margin_bottom = -8.0
 custom_fonts/font = SubResource( 1 )
-custom_colors/font_color = Color( 0, 0, 0, 1 )
+custom_colors/font_color = Color( 0.403922, 0.368627, 0.286275, 1 )
 align = 1
+valign = 1
 
 [node name="ScoreView" type="Control" parent="UI/Control"]
 visible = false
 anchor_right = 1.0
 anchor_bottom = 1.0
-margin_left = 0.323547
-margin_top = -0.323532
-margin_right = 0.323547
-margin_bottom = -0.323532
+margin_left = -0.152115
+margin_top = 2.05473
+margin_right = -0.15213
+margin_bottom = 2.05473
+
+[node name="ScoreBack" type="TextureRect" parent="UI/Control/ScoreView"]
+margin_left = 14.0
+margin_top = 12.0
+margin_right = 79.0
+margin_bottom = 52.0
+texture = ExtResource( 16 )
 
 [node name="Score" type="Label" parent="UI/Control/ScoreView"]
-margin_left = 46.2635
-margin_top = 18.7365
-margin_right = 446.264
-margin_bottom = 48.7365
+margin_left = 43.2635
+margin_top = 20.7365
+margin_right = 443.264
+margin_bottom = 50.7365
 custom_fonts/font = SubResource( 1 )
-custom_colors/font_color = Color( 0, 0, 0, 1 )
+custom_colors/font_color = Color( 0.403922, 0.368627, 0.286275, 1 )
 text = "x 10"
 
 [node name="ScoreTimer" type="Timer" parent="UI/Control/ScoreView"]
 wait_time = 3.0
 one_shot = true
 
-[node name="Sprite" type="Sprite" parent="UI/Control/ScoreView"]
-position = Vector2( 30, 30 )
-scale = Vector2( 2, 2 )
-texture = ExtResource( 13 )
-
-[node name="Particle" parent="." instance=ExtResource( 14 )]
+[node name="TextureRect" type="TextureRect" parent="UI/Control/ScoreView"]
+margin_left = 24.0
+margin_top = 21.0
+margin_right = 40.0
+margin_bottom = 37.0
+texture = ExtResource( 17 )
 [connection signal="done_expanding" from="Exploder" to="." method="_on_Exploder_done_expanding"]
 [connection signal="timeout" from="Exploder/ExpandTimer" to="Exploder" method="_on_ExpandTimer_timeout"]
 [connection signal="timeout" from="Camera/ScreenShakeTimer" to="Camera" method="_on_ScreenShakeTimer_timeout"]

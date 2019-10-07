@@ -3,7 +3,7 @@ extends Node2D
 const EXPLODE_RANGE = 10
 const SHOT_RADIUS = 16
 
-const WALL_COLORS = [Color("6d6b83"), Color("bebcd4"), Color("a3a1b7"), Color("807e96")]
+# const WALL_COLORS = [Color("6d6b83"), Color("bebcd4"), Color("a3a1b7"), Color("807e96")]
 const ENEMY_COLORS = [Color("352e5a"), Color("6e61b9"), Color("8176c2"), Color("9488de")]
 const FAT_ENEMY_COLORS = [Color("1b3c39"), Color("439177"), Color("5cac84"), Color("72bd98")]
 const GEM_COLORS = [Color("711814"), Color("a52620"), Color("dc4635"), Color("e16455"), Color("f4cdc5")]
@@ -18,6 +18,7 @@ var lost: = false
 var coins_collected: = 0
 
 func set_label(text:String) -> void:
+	$UI/Control/HintRect.visible = not text.empty()
 	$UI/Control/Label.text = text
 
 func get_coins() -> Array:
@@ -65,8 +66,16 @@ func check_lose() -> bool:
 			lost = true
 			$Camera.screen_shake(3)
 			$Player.disable()
-			set_label("You lost! Hit R to restart.")
+			set_label("You lost! [R] to restart.")
 			show_score()
+			
+			for i in range(10):
+				var p:Particle = preload("res://OrbParticle.tscn").instance()
+				p.init(Vector2(0, 0))
+				p.z = 15
+				$Orb.visible = false
+				add_child(p)
+			
 			return true
 			
 	return false
@@ -75,6 +84,14 @@ func create_shot_particle(pos:Vector2):
 	var shot_particle:Node2D = preload("res://ShotParticle.tscn").instance()
 	shot_particle.position = pos
 	add_child(shot_particle)
+	
+func create_gem_particles(coin):
+	for i in range(4):
+		var particle:Node2D = preload("res://GemParticle.tscn").instance()
+		particle.position = coin.position
+		particle.get_node("Sprite").position.y = -coin.z
+		particle.modulate = Utils.rand_array(GEM_COLORS)
+		add_child(particle)
 
 func _physics_process(delta):
 	if check_lose():
@@ -90,15 +107,12 @@ func _physics_process(delta):
 		for shot in shots:
 			if $Env.has_wall_at(shot.position):
 				shot.destroy()
-				for i in range(10):
-					create_shot_particle(shot.position)
 				continue
 			
 			if (enemy.position - shot.position).length() < SHOT_RADIUS:
 				enemy.hit()
 				pause_effect()
 				shot.destroy()
-				create_shot_particle(shot.position)
 				
 				# Destroy other enemies which are near shot
 				for enemy2 in get_enemies():
@@ -112,10 +126,10 @@ func _physics_process(delta):
 		if enemy.is_destroyed:
 			continue
 		var coords:Vector2 = enemy.coords()
-		if $Env.tiles.has(enemy.coords()):
+		if not enemy.skipper and $Env.tiles.has(enemy.coords()):
 			$Env.remove_wall(coords)
 			enemy.destroy_no_wall()
-			create_particles(Env.coords_to_pos(coords), WALL_COLORS, 100)
+			create_wall_particles(Env.coords_to_pos(coords))
 			
 	for coin in get_coins():
 		if coin.position.distance_to($Player.position) < Env.SIZE:
@@ -136,6 +150,7 @@ func coin_taken(coin):
 	show_score()
 	$UI/Control/ScoreView/ScoreTimer.start()
 	# create_particles(coin.position, GEM_COLORS, 30)
+	create_gem_particles(coin)
 	coin.queue_free()
 	
 func create_enemy(init_pos:Vector2, stationary:bool, type: = 0):
@@ -156,6 +171,8 @@ func create_coin(init_pos:Vector2):
 
 func _on_Shot_destroyed(shot:Node2D) -> void:
 	shots.erase(shot)
+	for i in range(10):
+		create_shot_particle(shot.position)
 	shot.queue_free()
 	
 func check_circle():
@@ -176,7 +193,7 @@ func _on_Enemy_destroyed(enemy):
 	$Env.add_wall_at(enemy.position).type = enemy.type
 	for coin in get_coins():
 		if Env.pos_to_coords(coin.position) == Env.pos_to_coords(enemy.position):
-			create_particles(coin.position, GEM_COLORS, 30)
+			create_gem_particles(coin)
 			coin.queue_free()
 			
 	enemy.queue_free()
@@ -193,8 +210,9 @@ func _on_Enemy_destroyed(enemy):
 		e.calc_path()
 	
 func _on_Enemy_destroyed_no_wall(enemy):
-	var colors: = ENEMY_COLORS if enemy.type == 1 else FAT_ENEMY_COLORS
-	create_particles(enemy.position, colors, 100)
+	#var colors: = ENEMY_COLORS if enemy.type == 0 else FAT_ENEMY_COLORS
+	#create_particles(enemy.position, colors, 100)
+	create_wall_particles(enemy.position)
 	enemy.queue_free()
 
 func _on_Enemy_reached_center(enemy):
@@ -223,6 +241,12 @@ func create_particle(pos:Vector2, color:Color):
 	p.init(pos, color)
 	add_child(p)
 
+func create_wall_particles(pos:Vector2):
+	for i in range(20):
+		var p:Particle = preload("res://WallParticle.tscn").instance()
+		p.init(pos)
+		add_child(p)
+
 func _on_PauseEffectTimer_timeout():
 	get_tree().paused = false
 
@@ -231,7 +255,8 @@ func _on_Exploder_done_expanding(expanded:Dictionary):
 		if $Env.has_wall(coords):
 			create_coin(Env.coords_to_pos(coords))
 			$Env.remove_wall(coords)
-			create_particles(Env.coords_to_pos(coords), WALL_COLORS, 30)
+			
+			create_wall_particles(Env.coords_to_pos(coords))
 			
 	$Spawner.next_level()
 	

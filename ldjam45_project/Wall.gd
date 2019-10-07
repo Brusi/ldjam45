@@ -3,6 +3,7 @@ extends Node2D
 var type: = 0 setget set_type
 
 func _ready():
+	$AnimatedSprite.play("default")
 	pass # Replace with function body.
 	
 func set_type(value:int):
@@ -13,3 +14,7 @@ func set_type(value:int):
 	else:
 		$Normal.visible = false
 		$Big.visible = true
+
+
+func _on_AnimatedSprite_animation_finished():
+	$AnimatedSprite.visible = false

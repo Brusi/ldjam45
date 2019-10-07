@@ -21,7 +21,7 @@ func is_done():
 	return state == State.DONE
 
 func _ready():
-	emit_signal("set_label", "WASD to move")
+	emit_signal("set_label", "[WASD] to move")
 
 func _process(delta:float):
 	match state:
@@ -29,12 +29,12 @@ func _process(delta:float):
 			if $"../Player".position.length() > Env.SIZE:
 				state = State.MOVED
 		State.MOVED:
-			emit_signal("set_label", "Shoot Gargoyles with mouse")
+			emit_signal("set_label", "Shoot Gargoyles [mouse]")
 			emit_signal("spawn_enemy", Vector2(3, 0), true)
 			state = State.CREATED_ONE
 		State.CREATED_ONE:
 			if $"..".get_enemies().empty():
-				$"../Player".position = Vector2.ZERO
+				$"../Player".recenter()
 				emit_signal("set_label", "Complete the circle")
 				
 				emit_signal("spawn_enemy", Vector2(-3, 0), true)

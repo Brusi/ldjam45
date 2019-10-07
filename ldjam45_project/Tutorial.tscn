@@ -8,7 +8,7 @@
 [node name="Spawner" parent="." index="8"]
 enabled = false
 
-[node name="Tutorial" type="Node" parent="." index="12"]
+[node name="Tutorial" type="Node" parent="." index="11"]
 script = ExtResource( 2 )
 
 [node name="BlastTimer" type="Timer" parent="Tutorial" index="0"]

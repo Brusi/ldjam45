@@ -3,7 +3,7 @@ extends Node
 signal spawned(pos, stationary, type)
 signal new_wave
 
-enum EnemyType { REGULAR, FAT }
+enum EnemyType { REGULAR=0, FAT=1, SKIP=2}
 
 export var enabled: = true
 
@@ -14,21 +14,17 @@ export var chance_scatter: = 0.5
 
 var active: = true
 
+var type:int = EnemyType.REGULAR
+
 func _ready():
 	active = enabled
 	pass # Replace with function body.
 	
 func spawn_enemies(dir:Vector2, i):
-	print("num_enemies=",num_enemies)
-	
 	if i == num_enemies:
 		return
 	var actual_dir = dir if dir != Vector2.ZERO else Utils.rand_dir()
 	
-	var type:int = EnemyType.REGULAR
-	if num_enemies >= 4 and Utils.bernoulli(0.3):
-		type = EnemyType.FAT
-		
 	emit_signal("spawned", actual_dir * (250 + i * 40), false, type)
 	call_deferred("spawn_enemies", dir, i+1)
 
@@ -40,11 +36,15 @@ func _on_Timer_timeout():
 	if not Utils.bernoulli(chance_scatter):
 		dir = Utils.rand_dir()
 			
+	type = EnemyType.REGULAR
+	if num_enemies >= 4 and Utils.bernoulli(0.3):
+		type = EnemyType.FAT
 	call_deferred("spawn_enemies", dir, 0)
 
 func start() -> void:
 	if enabled:
 		active = true
+	$Timer.start()
 
 func stop() -> void:
 	active = false

@@ -1,8 +1,10 @@
 extends Node2D
 
-const SPEED: = 0.5
+export var speed: = 0.5
+export var diminish: = 4.0
 
-var dir: = Utils.rand_dir() * SPEED
+
+var dir: = Utils.rand_dir() * speed
 
 func _ready():
 	pass # Replace with function body.
@@ -10,10 +12,7 @@ func _ready():
 func _process(delta:float) -> void:
 	pass
 	position += dir
-	$Sprite.scale.x -= delta*4
-	$Sprite.scale.y -= delta*4
+	$Sprite.scale.x -= delta*diminish
+	$Sprite.scale.y -= delta*diminish
 	if $Sprite.scale.x <= 0:
 		queue_free()
-	
-
-

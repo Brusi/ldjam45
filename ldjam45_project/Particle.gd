@@ -10,7 +10,9 @@ var vel: = Vector2()
 var vel_z: = 0.0
 var z: = 0.0
 
-var IDLE_TIME: = 2.0
+export var shrink: = true
+
+var IDLE_TIME: = 4.0
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
@@ -39,9 +41,10 @@ func _process(delta):
 	position += vel * delta
 	$Sprite.position.y = -z + 0
 	
-	if vel.length() < 0.1:
-		modulate.a = max(0,modulate.a - delta/IDLE_TIME)
-		if modulate.a <= 0:
+	if shrink and vel.length() < 0.1:
+		scale.x = max(0,scale.x - delta/IDLE_TIME)
+		scale.y = scale.x
+		if scale.x <= 0:
 			queue_free()
 		
 

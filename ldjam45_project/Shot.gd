@@ -10,12 +10,14 @@ var init_pos:Vector2
 
 func init(_init_pos:Vector2, _target_pos:Vector2):
 	init_pos = _init_pos
-	position = init_pos
-	vel = (_target_pos - _init_pos).normalized() * speed
+	var dir: = (_target_pos - _init_pos).normalized()
+	vel = dir * speed
+	
+	position = init_pos + dir * 10 + Vector2(0, 3)
 	
 func _physics_process(delta):
 	position += vel
-	if (position - init_pos).length() > 150:
+	if (position - init_pos).length() > 80:
 		emit_signal("destroyed", self)
 		
 func destroy():

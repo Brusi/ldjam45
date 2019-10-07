@@ -2,13 +2,21 @@ extends Node2D
 
 export var on_top_offset: = -10000.0
 
-export var size: = 15
-export var large_chance: = 0.02#0.3
-export var empty_chance: = 0.8#0.4
+export var size: = 10
+export var large_chance: = 0.03#0.3
+export var empty_chance: = 0.82#0.4
 
 var used: = {}
 
 func _ready():
+	for child in get_children():
+		child.offset.y = -on_top_offset
+		
+	for i in range(-1,2):
+		for j in range(-1, 2):
+			# Set stage area as used.
+			set_used(i,j)
+	
 	position.y = on_top_offset
 	for i in range(-size, size+1):
 		for j in range(-size, size+1):

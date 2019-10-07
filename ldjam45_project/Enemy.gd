@@ -11,6 +11,7 @@ export var type: = 1
 
 export var speed: = 0.5
 export var stationary: = false
+export var skipper: = false
 
 export var hp: = 1
 
