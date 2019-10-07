@@ -165,6 +165,9 @@ func check_free_way(a:Vector2, b:Vector2) -> bool:
 func has_wall(coords:Vector2) -> bool:
 	return tiles.has(coords)
 	
+func has_wall_at(pos:Vector2) -> bool:
+	return tiles.has(pos_to_coords(pos))
+	
 func get_min_coords() -> Vector2:
 	var min_coords: = Vector2.ZERO
 	for wall_coords in tiles.keys():

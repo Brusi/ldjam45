@@ -7,8 +7,12 @@ signal destroyed_no_wall(enemy)
 signal reached_center(enemy)
 signal blocked(enemy)
 
+export var type: = 1
+
 export var speed: = 0.5
 export var stationary: = false
+
+export var hp: = 1
 
 var path: = []
 
@@ -69,6 +73,13 @@ func _physics_process(delta):
 func coords() -> Vector2:
 	return Env.pos_to_coords(position)
 	
+func hit() -> void:
+	hp -= 1
+	if hp == 0:
+		destroy()
+	modulate = Color.black
+	$RecolorTimer.start()
+
 func destroy():
 	if is_destroyed:
 		return
@@ -82,7 +93,7 @@ func destroy_no_wall():
 	emit_signal("destroyed_no_wall", self)
 	
 func _process(delta:float):
-	if stationary:
+	if stationary or stopped or calculating:
 		$Back.visible = false
 		$Front.visible = false
 		$Idle.visible = true
@@ -95,6 +106,5 @@ func _process(delta:float):
 		$Front.visible = false
 		$Back.visible = true
 
-# Called every frame. 'delta' is the elapsed time since the previous frame.
-#func _process(delta):
-#	pass
+func _on_RecolorTimer_timeout():
+	modulate = Color.white

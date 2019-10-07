@@ -1,7 +1,9 @@
 extends Node
 
-signal spawned(pos, stationary)
+signal spawned(pos, stationary, type)
 signal new_wave
+
+enum EnemyType { REGULAR, FAT }
 
 export var enabled: = true
 
@@ -20,8 +22,12 @@ func spawn_enemies(dir:Vector2, i):
 	if i == num_enemies:
 		return
 	var actual_dir = dir if dir != Vector2.ZERO else Utils.rand_dir()
+	
+	var type:int = EnemyType.REGULAR
+	if num_enemies >= 4 and Utils.bernoulli(0.3):
+		type = EnemyType.FAT
 		
-	emit_signal("spawned", actual_dir * (250 + i * 40), false)
+	emit_signal("spawned", actual_dir * (250 + i * 40), false, type)
 	call_deferred("spawn_enemies", dir, i+1)
 
 func _on_Timer_timeout():
@@ -33,6 +39,10 @@ func _on_Timer_timeout():
 		dir = Utils.rand_dir()
 			
 	call_deferred("spawn_enemies", dir, 0)
+
+func start() -> void:
+	if enabled:
+		active = true
 
 func stop() -> void:
 	active = false

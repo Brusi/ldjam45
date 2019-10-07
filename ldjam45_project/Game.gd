@@ -5,7 +5,9 @@ const SHOT_RADIUS = 16
 
 const WALL_COLORS = [Color("6d6b83"), Color("bebcd4"), Color("a3a1b7"), Color("807e96")]
 const ENEMY_COLORS = [Color("352e5a"), Color("6e61b9"), Color("8176c2"), Color("9488de")]
+const FAT_ENEMY_COLORS = [Color("1b3c39"), Color("439177"), Color("5cac84"), Color("72bd98")]
 const GEM_COLORS = [Color("711814"), Color("a52620"), Color("dc4635"), Color("e16455"), Color("f4cdc5")]
+const SHOT_COLORS = [Color("ffba59"), Color("ffe675"), Color("fff385"), Color("ffffe2")]
 
 var shots: = []
 
@@ -40,8 +42,11 @@ func _process(event):
 			add_child(shot)
 	
 	if Input.is_action_just_pressed("restart"):
-		get_tree().reload_current_scene()
-		
+		var tut_node: = get_node_or_null("Tutorial")
+		if tut_node != null and tut_node.is_done():
+			get_tree().change_scene("res://Game.tscn")
+		else :
+			get_tree().reload_current_scene()
 	if Input.is_key_pressed(KEY_Q):
 		$Env.add_wall(Env.pos_to_coords($Target.position))
 		
@@ -74,8 +79,14 @@ func _physics_process(delta):
 		if enemy.is_destroyed:
 			continue
 		for shot in shots:
+			if $Env.has_wall_at(shot.position):
+				shot.destroy()
+				create_particles(shot.position, SHOT_COLORS, 50)
+				continue
+			
 			if (enemy.position - shot.position).length() < SHOT_RADIUS:
-				enemy.destroy()
+				enemy.hit()
+				pause_effect()
 				shot.destroy()
 				
 				# Destroy other enemies which are near shot
@@ -105,6 +116,9 @@ func show_score():
 	$UI/Control/ScoreView/Score.text = "x "+String(coins_collected)
 	$UI/Control/ScoreView/ScoreTimer.stop()
 	
+func hide_score():
+	$UI/Control/ScoreView.visible = false
+	
 
 func coin_taken(coin):
 	coins_collected += 1
@@ -113,8 +127,8 @@ func coin_taken(coin):
 	# create_particles(coin.position, GEM_COLORS, 30)
 	coin.queue_free()
 	
-func create_enemy(init_pos:Vector2, stationary:bool):
-	var enemy:Enemy = preload("res://Enemy.tscn").instance()
+func create_enemy(init_pos:Vector2, stationary:bool, type: = 0):
+	var enemy:Enemy = (preload("res://Enemy.tscn") if type == 0 else preload("res://FatEnemy.tscn")).instance()
 	enemy.position = init_pos
 	enemy.stationary = stationary
 	enemy.connect("destroyed", self, "_on_Enemy_destroyed")
@@ -168,7 +182,8 @@ func _on_Enemy_destroyed(enemy):
 		e.calc_path()
 	
 func _on_Enemy_destroyed_no_wall(enemy):
-	create_particles(enemy.position, ENEMY_COLORS, 100)
+	var colors: = ENEMY_COLORS if enemy.type == 1 else FAT_ENEMY_COLORS
+	create_particles(enemy.position, colors, 100)
 	enemy.queue_free()
 
 func _on_Enemy_reached_center(enemy):
@@ -178,10 +193,10 @@ func _on_Enemy_reached_center(enemy):
 func _on_Enemy_blocked(enemy):
 	pass
 
-func _on_Spawner_spawned(pos:Vector2, stationary:bool):
+func _on_Spawner_spawned(pos:Vector2, stationary:bool, type:int):
 	if lost:
 		return
-	create_enemy(pos, stationary)
+	create_enemy(pos, stationary, type)
 
 func pause_effect(wait_time: = 0.1):
 	$PauseEffectTimer.start(wait_time)
@@ -231,6 +246,13 @@ func _on_Tutorial_set_label(text):
 	set_label(text)
 
 
-func _on_Tutorial_spawn_enemy(coords, stationary):
+func _on_Tutorial_spawn_enemy(coords:Vector2, stationary:bool):
 	create_enemy(Env.coords_to_pos(coords), stationary)
 	pass # Replace with function body.
+
+
+func _on_Tutorial_done():
+	$Spawner.enabled = true
+	$Spawner.start()
+	coins_collected = 0
+	hide_score()

@@ -2,6 +2,7 @@ extends Node
 
 signal set_label(text)
 signal spawn_enemy(coords, stationary)
+signal done
 
 enum State {
 	START,
@@ -51,22 +52,20 @@ func _process(delta:float):
 			if $"..".get_coins().empty():
 				state = State.COLLECTED_GEMS
 				emit_signal("set_label", "Protect the orb!")
-				for i in range(4):
-					var dir = Utils.rand_dir()
-					emit_signal("spawn_enemy", dir * (10 + i*6), false)
-					emit_signal("spawn_enemy", dir * (11.5 + i*6), false)
-					emit_signal("spawn_enemy", dir * (13 + i*6), false)
-					
+				emit_signal("done")
+				$TutorialDoneTimer.start()
 				
 		State.COLLECTED_GEMS:
-			if $"..".get_enemies().empty():
-				emit_signal("set_label", "Well done! Get ready...")
-				state = State.DONE
-				$TutorialDoneTimer.start()
+			pass
+			#if $"..".get_enemies().empty():
+			#	state = State.DONE
+			
+			#	emit_signal("set_label", "")
 				
 		State.DONE:
 			pass
 
 func _on_TutorialDoneTimer_timeout():
-	get_tree().change_scene("res://Game.tscn")
+	emit_signal("set_label", "")
+	state = State.DONE
 

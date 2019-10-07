@@ -53,7 +53,6 @@ visible = false
 
 [node name="AnimatedSprite" type="AnimatedSprite" parent="Front"]
 frames = SubResource( 1 )
-frame = 1
 playing = true
 offset = Vector2( 0, -1.5 )
 
@@ -62,6 +61,7 @@ visible = false
 
 [node name="AnimatedSprite" type="AnimatedSprite" parent="Back"]
 frames = SubResource( 2 )
+frame = 7
 playing = true
 offset = Vector2( 0, -1 )
 
@@ -72,3 +72,8 @@ texture = ExtResource( 19 )
 [node name="Idle" type="Sprite" parent="."]
 visible = false
 texture = ExtResource( 20 )
+
+[node name="RecolorTimer" type="Timer" parent="."]
+wait_time = 0.05
+one_shot = true
+[connection signal="timeout" from="RecolorTimer" to="." method="_on_RecolorTimer_timeout"]
