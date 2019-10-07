@@ -54,15 +54,17 @@ func _ready():
 	
 func add_wall_at(pos:Vector2):
 	var wall = add_wall(pos_to_coords(pos))
+	if wall == null:
+		return null
 	wall.position = pos
 	return wall
 	
 func add_wall(coords:Vector2):
 	if coords == Vector2.ZERO:
-		return
+		return null
 
 	if tiles.has(coords):
-		return
+		return tiles[coords]
 	
 	var wall: = preload("res://Wall.tscn").instance()
 	wall.position = coords_to_pos(coords)
@@ -103,7 +105,7 @@ func reconstruct_path(cameFrom, current):
         total_path.push_front(current)
     return total_path
 
-func astar(source:Vector2, target:Vector2 = Vector2(0,0)):
+func astar(source:Vector2, target:Vector2 = Vector2(0,0), allow_skip: = false):
 	var openSet: = {source: false}
 	var cameFrom: = {}
 	var closedSet: = {}
@@ -123,16 +125,16 @@ func astar(source:Vector2, target:Vector2 = Vector2(0,0)):
 
 		if current == target:
 			return reconstruct_path(cameFrom, current)
-			
-		
-		
 		
 		openSet.erase(current)
 		closedSet[current] = false
 		
 		for rel in NEIGHBORS:
 			var neighbor:Vector2 = current + rel
-			if not check_free_way(current, neighbor):
+			
+			var can_go: = (allow_skip and not has_wall(neighbor)) or check_free_way(current, neighbor)
+			
+			if not can_go:
 				continue
 			#if tiles.has(neighbor):
 			#	continue
@@ -168,6 +170,9 @@ func has_wall(coords:Vector2) -> bool:
 	
 func has_wall_at(pos:Vector2) -> bool:
 	return tiles.has(pos_to_coords(pos))
+	
+func get_wall_at(pos:Vector2) -> bool:
+	return tiles[pos_to_coords(pos)]
 	
 func get_min_coords() -> Vector2:
 	var min_coords: = Vector2.ZERO

@@ -54,6 +54,7 @@ visible = false
 
 [node name="AnimatedSprite" type="AnimatedSprite" parent="Front"]
 frames = SubResource( 1 )
+frame = 6
 playing = true
 offset = Vector2( 0, -1.5 )
 
@@ -62,7 +63,7 @@ visible = false
 
 [node name="AnimatedSprite" type="AnimatedSprite" parent="Back"]
 frames = SubResource( 2 )
-frame = 7
+frame = 5
 playing = true
 offset = Vector2( 0, -1 )
 

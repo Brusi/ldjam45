@@ -1,4 +1,4 @@
-[gd_scene load_steps=19 format=2]
+[gd_scene load_steps=20 format=2]
 
 [ext_resource path="res://Game.gd" type="Script" id=1]
 [ext_resource path="res://Floor.gd" type="Script" id=2]
@@ -9,17 +9,21 @@
 [ext_resource path="res://Env.gd" type="Script" id=7]
 [ext_resource path="res://Exploder.gd" type="Script" id=8]
 [ext_resource path="res://Player.tscn" type="PackedScene" id=9]
-[ext_resource path="res://assets/target.png" type="Texture" id=10]
-[ext_resource path="res://Target.gd" type="Script" id=11]
-[ext_resource path="res://Camera.gd" type="Script" id=12]
-[ext_resource path="res://Spawner.gd" type="Script" id=13]
-[ext_resource path="res://assets/ui/ui_tutorial.png" type="Texture" id=14]
-[ext_resource path="res://assets/font/CompassPro.ttf" type="DynamicFontData" id=15]
-[ext_resource path="res://assets/ui/ui_gems.png" type="Texture" id=16]
-[ext_resource path="res://assets/ui/gem_ui.png" type="Texture" id=17]
+[ext_resource path="res://Target.gd" type="Script" id=10]
+[ext_resource path="res://Camera.gd" type="Script" id=11]
+[ext_resource path="res://Spawner.gd" type="Script" id=12]
+[ext_resource path="res://assets/ui/ui_tutorial.png" type="Texture" id=13]
+[ext_resource path="res://assets/font/CompassPro.ttf" type="DynamicFontData" id=14]
+[ext_resource path="res://assets/ui/ui_gems.png" type="Texture" id=15]
+[ext_resource path="res://assets/ui/gem_ui.png" type="Texture" id=16]
+[ext_resource path="res://assets/ui/ui_defeat.png" type="Texture" id=17]
+
+[sub_resource type="StreamTexture" id=2]
+load_path = "res://.import/target.png-52c019dda84da6fc854650719104c4ec.stex"
 
 [sub_resource type="DynamicFont" id=1]
-font_data = ExtResource( 15 )
+size = 14
+font_data = ExtResource( 14 )
 
 [node name="Game" type="YSort"]
 script = ExtResource( 1 )
@@ -54,8 +58,8 @@ one_shot = true
 position = Vector2( 0, -20 )
 
 [node name="Target" type="Sprite" parent="."]
-texture = ExtResource( 10 )
-script = ExtResource( 11 )
+texture = SubResource( 2 )
+script = ExtResource( 10 )
 
 [node name="Camera" type="Camera2D" parent="."]
 current = true
@@ -64,7 +68,7 @@ drag_margin_left = 0.0
 drag_margin_top = 0.0
 drag_margin_right = 0.0
 drag_margin_bottom = 0.0
-script = ExtResource( 12 )
+script = ExtResource( 11 )
 
 [node name="ScreenShakeTimer" type="Timer" parent="Camera"]
 wait_time = 0.2
@@ -77,7 +81,7 @@ one_shot = true
 autostart = true
 
 [node name="Spawner" type="Node" parent="."]
-script = ExtResource( 13 )
+script = ExtResource( 12 )
 
 [node name="Timer" type="Timer" parent="Spawner"]
 wait_time = 4.0
@@ -86,6 +90,10 @@ autostart = true
 [node name="PauseEffectTimer" type="Timer" parent="."]
 pause_mode = 2
 wait_time = 0.05
+
+[node name="DeathTimer" type="Timer" parent="."]
+wait_time = 3.0
+one_shot = true
 
 [node name="UI" type="CanvasLayer" parent="."]
 
@@ -103,7 +111,7 @@ margin_left = -84.0
 margin_top = -47.0
 margin_right = 84.0
 margin_bottom = -8.0
-texture = ExtResource( 14 )
+texture = ExtResource( 13 )
 
 [node name="Label" type="Label" parent="UI/Control"]
 anchor_top = 1.0
@@ -112,7 +120,7 @@ anchor_bottom = 1.0
 margin_top = -47.0
 margin_bottom = -8.0
 custom_fonts/font = SubResource( 1 )
-custom_colors/font_color = Color( 0.403922, 0.368627, 0.286275, 1 )
+custom_colors/font_color = Color( 0.67451, 0.623529, 0.490196, 1 )
 align = 1
 valign = 1
 
@@ -130,15 +138,15 @@ margin_left = 14.0
 margin_top = 12.0
 margin_right = 79.0
 margin_bottom = 52.0
-texture = ExtResource( 16 )
+texture = ExtResource( 15 )
 
 [node name="Score" type="Label" parent="UI/Control/ScoreView"]
 margin_left = 43.2635
-margin_top = 20.7365
+margin_top = 21.7365
 margin_right = 443.264
-margin_bottom = 50.7365
+margin_bottom = 51.7365
 custom_fonts/font = SubResource( 1 )
-custom_colors/font_color = Color( 0.403922, 0.368627, 0.286275, 1 )
+custom_colors/font_color = Color( 0.67451, 0.623529, 0.490196, 1 )
 text = "x 10"
 
 [node name="ScoreTimer" type="Timer" parent="UI/Control/ScoreView"]
@@ -150,11 +158,62 @@ margin_left = 24.0
 margin_top = 21.0
 margin_right = 40.0
 margin_bottom = 37.0
+texture = ExtResource( 16 )
+
+[node name="Defeat" type="Control" parent="UI/Control"]
+visible = false
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+margin_left = -20.0
+margin_top = -20.0
+margin_right = 20.0
+margin_bottom = 20.0
+
+[node name="TextureRect" type="TextureRect" parent="UI/Control/Defeat"]
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+margin_left = -84.0
+margin_top = -48.5
+margin_right = 84.0
+margin_bottom = 48.5
 texture = ExtResource( 17 )
+
+[node name="Defeat" type="Label" parent="UI/Control/Defeat"]
+anchor_top = 0.5
+anchor_right = 1.0
+anchor_bottom = 0.5
+margin_left = -59.2635
+margin_top = -60.2635
+margin_right = 58.7365
+margin_bottom = 24.7365
+custom_fonts/font = SubResource( 1 )
+custom_colors/font_color = Color( 0.709804, 0.74902, 0.752941, 1 )
+text = "Defeat!"
+align = 1
+valign = 1
+
+[node name="Press R" type="Label" parent="UI/Control/Defeat"]
+anchor_top = 0.5
+anchor_right = 1.0
+anchor_bottom = 0.5
+margin_left = -59.2635
+margin_top = -30.2635
+margin_right = 58.7365
+margin_bottom = 54.7365
+custom_fonts/font = SubResource( 1 )
+custom_colors/font_color = Color( 0.67451, 0.623529, 0.490196, 1 )
+text = "Press [R] to restart"
+align = 1
+valign = 1
 [connection signal="done_expanding" from="Exploder" to="." method="_on_Exploder_done_expanding"]
 [connection signal="timeout" from="Exploder/ExpandTimer" to="Exploder" method="_on_ExpandTimer_timeout"]
 [connection signal="timeout" from="Camera/ScreenShakeTimer" to="Camera" method="_on_ScreenShakeTimer_timeout"]
 [connection signal="spawned" from="Spawner" to="." method="_on_Spawner_spawned"]
 [connection signal="timeout" from="Spawner/Timer" to="Spawner" method="_on_Timer_timeout"]
 [connection signal="timeout" from="PauseEffectTimer" to="." method="_on_PauseEffectTimer_timeout"]
+[connection signal="timeout" from="DeathTimer" to="." method="_on_DeathTimer_timeout"]
 [connection signal="timeout" from="UI/Control/ScoreView/ScoreTimer" to="." method="_on_ScoreTimer_timeout"]

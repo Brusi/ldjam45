@@ -82,6 +82,7 @@ func expand_to(coords:Vector2) -> bool:
 func add_white(coords:Vector2):
 	var white:Sprite = preload("res://White.tscn").instance()
 	white.position = Env.coords_to_pos(coords)
+	white.modulate = Color("f1fffe")
 	# add_child(white)
 	add_child(white)
 

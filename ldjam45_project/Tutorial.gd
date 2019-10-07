@@ -29,7 +29,7 @@ func _process(delta:float):
 			if $"../Player".position.length() > Env.SIZE:
 				state = State.MOVED
 		State.MOVED:
-			emit_signal("set_label", "Shoot Gargoyles [mouse]")
+			emit_signal("set_label", "Shoot Gargoyles")
 			emit_signal("spawn_enemy", Vector2(3, 0), true)
 			state = State.CREATED_ONE
 		State.CREATED_ONE:
@@ -55,7 +55,7 @@ func _process(delta:float):
 		State.AFTER_BLAST:
 			if $"..".get_coins().empty():
 				state = State.COLLECTED_GEMS
-				emit_signal("set_label", "Protect the orb!")
+				emit_signal("set_label", "Protect The Orb!")
 				emit_signal("done")
 				$TutorialDoneTimer.start()
 				state = State.COLLECTED_GEMS

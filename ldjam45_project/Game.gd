@@ -31,6 +31,7 @@ func _ready():
 	Input.set_mouse_mode(Input.MOUSE_MODE_HIDDEN)
 	
 	$Player.env = $Env
+	MusicPlayer._play_current()
 
 func _process(event):
 	if not lost and Input.is_mouse_button_pressed(BUTTON_LEFT):
@@ -41,6 +42,7 @@ func _process(event):
 			shot.connect("destroyed", self, "_on_Shot_destroyed")
 			shots.append(shot)
 			add_child(shot)
+			SoundManager.play_random_sound(SoundManager.fire)
 	
 	if Input.is_action_just_pressed("restart"):
 		var tut_node: = get_node_or_null("Tutorial")
@@ -64,10 +66,11 @@ func check_lose() -> bool:
 			for enemy in get_enemies():
 				enemy.stop()
 			lost = true
+			MusicPlayer.stop_game_music()
 			$Camera.screen_shake(3)
 			$Player.disable()
-			set_label("You lost! [R] to restart.")
-			show_score()
+			# set_label("You lost! [R] to restart.")
+			$DeathTimer.start()
 			
 			for i in range(10):
 				var p:Particle = preload("res://OrbParticle.tscn").instance()
@@ -106,6 +109,9 @@ func _physics_process(delta):
 			continue
 		for shot in shots:
 			if $Env.has_wall_at(shot.position):
+				var wall = $Env.get_wall_at(shot.position)
+				if wall != null:
+					wall.position += shot.vel * 1
 				shot.destroy()
 				continue
 			
@@ -132,6 +138,8 @@ func _physics_process(delta):
 			create_wall_particles(Env.coords_to_pos(coords))
 			
 	for coin in get_coins():
+		if coin.position.distance_to($Player.position) < Env.SIZE * 2:
+			coin.position += ($Player.position - coin.position) / 10
 		if coin.position.distance_to($Player.position) < Env.SIZE:
 			coin_taken(coin)
 			pause_effect(0.05)
@@ -154,8 +162,18 @@ func coin_taken(coin):
 	coin.queue_free()
 	
 func create_enemy(init_pos:Vector2, stationary:bool, type: = 0):
-	var enemy:Enemy = (preload("res://Enemy.tscn") if type == 0 else preload("res://FatEnemy.tscn")).instance()
+	print("create_enemy, type=",type)
+	
+	var enemy_type_scene:PackedScene = preload("res://Enemy.tscn")
+	match type:
+		0: enemy_type_scene = preload("res://Enemy.tscn")
+		1: enemy_type_scene = preload("res://FatEnemy.tscn")
+		2: enemy_type_scene = preload("res://ThinEnemy.tscn")
+
+	# enemy_type_scene = preload("res://ThinEnemy.tscn")
+	var enemy:Enemy = (enemy_type_scene).instance()
 	enemy.position = init_pos
+	enemy.prev_target = init_pos
 	enemy.stationary = stationary
 	enemy.connect("destroyed", self, "_on_Enemy_destroyed")
 	enemy.connect("destroyed_no_wall", self, "_on_Enemy_destroyed_no_wall")
@@ -190,7 +208,10 @@ func check_circle():
 	return false
 	
 func _on_Enemy_destroyed(enemy):
-	$Env.add_wall_at(enemy.position).type = enemy.type
+	var wall = $Env.add_wall_at(enemy.position)
+	if wall != null:
+		wall.type = enemy.type
+	
 	for coin in get_coins():
 		if Env.pos_to_coords(coin.position) == Env.pos_to_coords(enemy.position):
 			create_gem_particles(coin)
@@ -223,6 +244,7 @@ func _on_Enemy_blocked(enemy):
 	pass
 
 func _on_Spawner_spawned(pos:Vector2, stationary:bool, type:int):
+	print("_on_Spawner_spawned type=", type)
 	if lost:
 		return
 	create_enemy(pos, stationary, type)
@@ -293,3 +315,8 @@ func _on_Tutorial_done():
 	$Spawner.start()
 	coins_collected = 0
 	hide_score()
+
+
+func _on_DeathTimer_timeout():
+	show_score()
+	$UI/Control/Defeat.visible = true

@@ -3,7 +3,7 @@ extends Node
 signal spawned(pos, stationary, type)
 signal new_wave
 
-enum EnemyType { REGULAR=0, FAT=1, SKIP=2}
+enum EnemyType { REGULAR=0, FAT=1, THIN=2 }
 
 export var enabled: = true
 
@@ -37,8 +37,15 @@ func _on_Timer_timeout():
 		dir = Utils.rand_dir()
 			
 	type = EnemyType.REGULAR
-	if num_enemies >= 4 and Utils.bernoulli(0.3):
-		type = EnemyType.FAT
+	if num_enemies == 4:
+		if Utils.bernoulli(0.3):
+			type = EnemyType.FAT
+	elif num_enemies >= 5:
+		if Utils.bernoulli(0.3):
+			type = EnemyType.FAT
+		if Utils.bernoulli(0.3 / 0.7):
+			type = EnemyType.THIN
+		
 	call_deferred("spawn_enemies", dir, 0)
 
 func start() -> void:
