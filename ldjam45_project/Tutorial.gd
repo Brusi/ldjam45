@@ -10,6 +10,7 @@ enum State {
 	CREATED_ONE,
 	CREATED_MANY,
 	COMPLETED_CIRCLE,
+	AFTER_BLAST,
 	COLLECTED_GEMS,
 	DONE
 }
@@ -46,21 +47,21 @@ func _process(delta:float):
 				state = State.CREATED_MANY
 		State.CREATED_MANY:
 			if $"..".get_enemies().empty():
-				state = State.COMPLETED_CIRCLE
 				emit_signal("set_label", "Collect gems")
+				state = State.COMPLETED_CIRCLE
+				$BlastTimer.start(2)
 		State.COMPLETED_CIRCLE:
+			pass
+		State.AFTER_BLAST:
 			if $"..".get_coins().empty():
 				state = State.COLLECTED_GEMS
 				emit_signal("set_label", "Protect the orb!")
 				emit_signal("done")
 				$TutorialDoneTimer.start()
+				state = State.COLLECTED_GEMS
 				
 		State.COLLECTED_GEMS:
 			pass
-			#if $"..".get_enemies().empty():
-			#	state = State.DONE
-			
-			#	emit_signal("set_label", "")
 				
 		State.DONE:
 			pass
@@ -69,3 +70,5 @@ func _on_TutorialDoneTimer_timeout():
 	emit_signal("set_label", "")
 	state = State.DONE
 
+func _on_BlastTimer_timeout():
+	state = State.AFTER_BLAST

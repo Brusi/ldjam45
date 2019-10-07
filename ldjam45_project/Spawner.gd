@@ -19,6 +19,8 @@ func _ready():
 	pass # Replace with function body.
 	
 func spawn_enemies(dir:Vector2, i):
+	print("num_enemies=",num_enemies)
+	
 	if i == num_enemies:
 		return
 	var actual_dir = dir if dir != Vector2.ZERO else Utils.rand_dir()

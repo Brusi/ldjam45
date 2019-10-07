@@ -70,10 +70,19 @@ func check_lose() -> bool:
 			return true
 			
 	return false
+	
+func create_shot_particle(pos:Vector2):
+	var shot_particle:Node2D = preload("res://ShotParticle.tscn").instance()
+	shot_particle.position = pos
+	add_child(shot_particle)
 
 func _physics_process(delta):
 	if check_lose():
 		return
+		
+	for shot in shots:
+		if Utils.bernoulli(0.5):
+			create_shot_particle(shot.position)
 	
 	for enemy in get_enemies():
 		if enemy.is_destroyed:
@@ -81,13 +90,15 @@ func _physics_process(delta):
 		for shot in shots:
 			if $Env.has_wall_at(shot.position):
 				shot.destroy()
-				create_particles(shot.position, SHOT_COLORS, 50)
+				for i in range(10):
+					create_shot_particle(shot.position)
 				continue
 			
 			if (enemy.position - shot.position).length() < SHOT_RADIUS:
 				enemy.hit()
 				pause_effect()
 				shot.destroy()
+				create_shot_particle(shot.position)
 				
 				# Destroy other enemies which are near shot
 				for enemy2 in get_enemies():
@@ -162,7 +173,7 @@ func check_circle():
 	return false
 	
 func _on_Enemy_destroyed(enemy):
-	$Env.add_wall_at(enemy.position)
+	$Env.add_wall_at(enemy.position).type = enemy.type
 	for coin in get_coins():
 		if Env.pos_to_coords(coin.position) == Env.pos_to_coords(enemy.position):
 			create_particles(coin.position, GEM_COLORS, 30)
@@ -252,6 +263,7 @@ func _on_Tutorial_spawn_enemy(coords:Vector2, stationary:bool):
 
 
 func _on_Tutorial_done():
+	print("_on_Tutorial_done")
 	$Spawner.enabled = true
 	$Spawner.start()
 	coins_collected = 0

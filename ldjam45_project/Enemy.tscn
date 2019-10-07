@@ -41,6 +41,7 @@ animations = [ {
 "enemies",
 ]]
 script = ExtResource( 1 )
+type = 0
 
 [node name="Shadow" type="Sprite" parent="."]
 modulate = Color( 1, 1, 1, 0.196078 )
@@ -53,6 +54,7 @@ visible = false
 
 [node name="AnimatedSprite" type="AnimatedSprite" parent="Front"]
 frames = SubResource( 1 )
+frame = 3
 playing = true
 offset = Vector2( 0, -1.5 )
 
@@ -61,7 +63,7 @@ visible = false
 
 [node name="AnimatedSprite" type="AnimatedSprite" parent="Back"]
 frames = SubResource( 2 )
-frame = 7
+frame = 2
 playing = true
 offset = Vector2( 0, -1 )
 

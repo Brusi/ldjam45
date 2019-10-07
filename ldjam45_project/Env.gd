@@ -55,6 +55,7 @@ func _ready():
 func add_wall_at(pos:Vector2):
 	var wall = add_wall(pos_to_coords(pos))
 	wall.position = pos
+	return wall
 	
 func add_wall(coords:Vector2):
 	if coords == Vector2.ZERO:
