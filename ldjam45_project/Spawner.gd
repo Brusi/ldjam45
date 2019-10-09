@@ -8,7 +8,7 @@ enum EnemyType { REGULAR=0, FAT=1, THIN=2 }
 export var enabled: = true
 
 export var num_enemies: = 3
-export var max_num_enemies: = 6
+export var max_num_enemies: = 5
 
 export var chance_scatter: = 0.5
 

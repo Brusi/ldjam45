@@ -28,11 +28,6 @@ func _physics_process(delta):
 		vel = Vector2.ZERO
 		return
 		
-	for corner in get_corners(position):
-		var corner_coords: = Env.pos_to_coords(corner)
-		if $"../Env".has_wall(corner_coords):
-			position += Utils.rand_dir()
-	
 	if player_input("ui_right"):
 		vel.x = 1
 		look_right = true
@@ -53,16 +48,26 @@ func _physics_process(delta):
 		return
 	
 	vel = vel.normalized() * speed
+	
+	var no_block_mode: = false
+	for corner in get_corners(position):
+		var corner_coords: = Env.pos_to_coords(corner)
+		if $"../Env".has_wall(corner_coords):
+			no_block_mode = true
+			break
 
-	for advancement in [Vector2(vel.x, 0), Vector2(0, vel.y)]:
-		var blocked: = false
-		for corner in get_corners(position + advancement):
-			var corner_coords: = Env.pos_to_coords(corner)
-			if $"../Env".has_wall(corner_coords):
-				blocked = true
-				break
-		if not blocked:
-			position += advancement
+	if no_block_mode:
+		position += vel
+	else:
+		for advancement in [Vector2(vel.x, 0), Vector2(0, vel.y)]:
+			var blocked: = false
+			for corner in get_corners(position + advancement):
+				var corner_coords: = Env.pos_to_coords(corner)
+				if $"../Env".has_wall(corner_coords):
+					blocked = true
+					break
+			if not blocked:
+				position += advancement
 
 
 func _process(delta):

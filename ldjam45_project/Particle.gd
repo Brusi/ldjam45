@@ -42,9 +42,9 @@ func _process(delta):
 	$Sprite.position.y = -z + 0
 	
 	if shrink and vel.length() < 0.1:
-		scale.x = max(0,scale.x - delta/IDLE_TIME)
+		scale.x = max(0.0,scale.x - delta/IDLE_TIME)
 		scale.y = scale.x
-		if scale.x <= 0:
+		if scale.x <= 0.001:
 			queue_free()
 		
 

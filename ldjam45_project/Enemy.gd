@@ -16,6 +16,7 @@ export var skipper: = false
 export var hp: = 1
 
 var path: = []
+var new_path: = []
 
 var prev_target: = Vector2()
 var target: = Vector2()
@@ -29,6 +30,8 @@ var is_destroyed: = false
 
 var skip_free_way: = true
 
+var thread:Thread
+
 # Called when the node enters the scene tree for the first time.
 func _ready():
 	calc_path()
@@ -36,32 +39,53 @@ func _ready():
 func stop() -> void:
 	stopped = true
 	
+# Recalculate path only if the last path was blocked.
+func refine_path(new_coords:Vector2):
+	if calculating or stationary or stopped or is_destroyed:
+		return
+	
+	if path.size() <= 1 or not $"../Env".check_free_path(path):
+		calc_path()
+	
 func calc_path() -> void:
-	if stationary or stopped:
+	if calculating or stationary or stopped or is_destroyed:
+		print("not calculating")
 		return
 		
 	calculating = true
+
+	thread = Thread.new()
+	thread.start(self, "_thread_calc_path")
+	#_thread_calc_path("")
+
+func _thread_calc_path(null_userdata):
 	
-	path = $"../Env".astar(coords(), Vector2.ZERO, skipper)
+	new_path = $"../Env".astar(coords(), Vector2.ZERO, skipper)
 	
-	if skipper:
-		if path.size() >= 2:
-			target = Env.coords_to_pos(path[1])
-			skip_free_way = true
-		else:
-			target = Env.coords_to_pos(path[0])
-			skip_free_way = true
+	#if skipper:
+	#	if new_path.size() >= 2:
+	#		target = Env.coords_to_pos(new_path[1])
+	#		skip_free_way = true
+	#	else:
+	#		target = Env.coords_to_pos(new_path[0])
+	#		skip_free_way = true
 	
-	# print("path=",path)
-	calculating = false
+	
 	# stopped = path.empty()
-	if not path.empty():
-		aggressive_mode = false
-	else:
-		# print("path too complicated, falling back to aggressive mode")
-		aggressive_mode = true
+		
+	calculating = false
 
 func _physics_process(delta):
+	if not new_path.empty():
+		path = new_path
+		new_path = []
+		
+		if not path.empty():
+			aggressive_mode = false
+		else:
+			# print("path too complicated, falling back to aggressive mode")
+			aggressive_mode = true
+	
 	if stationary or stopped or calculating:
 		return
 		
@@ -147,9 +171,11 @@ func _process(delta:float):
 	if vel.y > 0:
 		$Back.visible = false
 		$Front.visible = true
+		$Idle.visible = false
 	else:
 		$Front.visible = false
 		$Back.visible = true
+		$Idle.visible = false
 
 func _on_RecolorTimer_timeout():
 	modulate = Color.white

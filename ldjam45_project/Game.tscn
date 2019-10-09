@@ -1,4 +1,4 @@
-[gd_scene load_steps=20 format=2]
+[gd_scene load_steps=21 format=2]
 
 [ext_resource path="res://Game.gd" type="Script" id=1]
 [ext_resource path="res://Floor.gd" type="Script" id=2]
@@ -12,11 +12,12 @@
 [ext_resource path="res://Target.gd" type="Script" id=10]
 [ext_resource path="res://Camera.gd" type="Script" id=11]
 [ext_resource path="res://Spawner.gd" type="Script" id=12]
-[ext_resource path="res://assets/ui/ui_tutorial.png" type="Texture" id=13]
+[ext_resource path="res://assets/ui/ui_gems.png" type="Texture" id=13]
 [ext_resource path="res://assets/font/CompassPro.ttf" type="DynamicFontData" id=14]
-[ext_resource path="res://assets/ui/ui_gems.png" type="Texture" id=15]
+[ext_resource path="res://assets/ui/ui_tutorial.png" type="Texture" id=15]
 [ext_resource path="res://assets/ui/gem_ui.png" type="Texture" id=16]
 [ext_resource path="res://assets/ui/ui_defeat.png" type="Texture" id=17]
+[ext_resource path="res://PauseHandler.gd" type="Script" id=18]
 
 [sub_resource type="StreamTexture" id=2]
 load_path = "res://.import/target.png-52c019dda84da6fc854650719104c4ec.stex"
@@ -101,6 +102,37 @@ one_shot = true
 anchor_right = 1.0
 anchor_bottom = 1.0
 
+[node name="PauseView" type="Control" parent="UI/Control"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+
+[node name="PausedBack" type="TextureRect" parent="UI/Control/PauseView"]
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+margin_left = -32.5
+margin_top = -20.0
+margin_right = 32.0
+margin_bottom = 20.0
+texture = ExtResource( 13 )
+
+[node name="Score2" type="Label" parent="UI/Control/PauseView"]
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+margin_left = -158.0
+margin_top = -10.0
+margin_right = 162.0
+margin_bottom = 15.0
+grow_horizontal = 2
+grow_vertical = 2
+custom_fonts/font = SubResource( 1 )
+custom_colors/font_color = Color( 0.67451, 0.623529, 0.490196, 1 )
+text = "Paused"
+align = 1
+
 [node name="HintRect" type="TextureRect" parent="UI/Control"]
 visible = false
 anchor_left = 0.5
@@ -111,7 +143,7 @@ margin_left = -84.0
 margin_top = -47.0
 margin_right = 84.0
 margin_bottom = -8.0
-texture = ExtResource( 13 )
+texture = ExtResource( 15 )
 
 [node name="Label" type="Label" parent="UI/Control"]
 anchor_top = 1.0
@@ -138,7 +170,7 @@ margin_left = 14.0
 margin_top = 12.0
 margin_right = 79.0
 margin_bottom = 52.0
-texture = ExtResource( 15 )
+texture = ExtResource( 13 )
 
 [node name="Score" type="Label" parent="UI/Control/ScoreView"]
 margin_left = 43.2635
@@ -209,6 +241,10 @@ custom_colors/font_color = Color( 0.67451, 0.623529, 0.490196, 1 )
 text = "Press [R] to restart"
 align = 1
 valign = 1
+
+[node name="PauseHandler" type="Node" parent="."]
+pause_mode = 2
+script = ExtResource( 18 )
 [connection signal="done_expanding" from="Exploder" to="." method="_on_Exploder_done_expanding"]
 [connection signal="timeout" from="Exploder/ExpandTimer" to="Exploder" method="_on_ExpandTimer_timeout"]
 [connection signal="timeout" from="Camera/ScreenShakeTimer" to="Camera" method="_on_ScreenShakeTimer_timeout"]

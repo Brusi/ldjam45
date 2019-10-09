@@ -14,6 +14,7 @@ var on: = true
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
+	create_stream(fire).volume_db = -6
 	pass # Replace with function body.
 	
 func _process(delta):
@@ -24,17 +25,24 @@ func _process(delta):
 			for stream in streams.values():
 				stream.stop()
 
+func create_stream(arr:Array) -> AudioStreamPlayer: 
+	var new_stream: = AudioStreamPlayer.new()
+	add_child(new_stream)
+	streams[arr] = new_stream
+	return new_stream
 
 func play_random_sound(arr:Array):
 	if not on:
 		return
 	
 	if not streams.has(arr):
-		var new_stream = AudioStreamPlayer.new()
-		add_child(new_stream)
-		streams[arr] = new_stream
-		
+		create_stream(arr)
+
 	var stream = streams[arr]
+	
+	var rand_stream: = AudioStreamRandomPitch.new()
+	rand_stream.random_pitch = 1.02
+	rand_stream.audio_stream = Utils.rand_array(arr)
 		
-	stream.stream = Utils.rand_array(arr)
+	stream.stream = rand_stream #Utils.rand_array(arr)
 	stream.play()

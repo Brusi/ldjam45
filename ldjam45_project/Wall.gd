@@ -25,3 +25,4 @@ func set_type(value:int):
 
 func _on_AnimatedSprite_animation_finished():
 	$AnimatedSprite.visible = false
+	pass

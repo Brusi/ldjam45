@@ -151,6 +151,12 @@ func astar(source:Vector2, target:Vector2 = Vector2(0,0), allow_skip: = false):
 				openSet[neighbor] = false
 	
 	return []
+	
+func check_free_path(path:Array) -> bool:
+	for i in range(path.size() - 1):
+		if not check_free_way(path[i], path[i+1]):
+			return false
+	return true
 		
 func check_free_way(a:Vector2, b:Vector2) -> bool:
 	var min_x:int = min(a.x, b.x)

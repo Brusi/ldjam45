@@ -17,6 +17,8 @@ var lost: = false
 
 var coins_collected: = 0
 
+var paused: = false
+
 func set_label(text:String) -> void:
 	$UI/Control/HintRect.visible = not text.empty()
 	$UI/Control/Label.text = text
@@ -44,17 +46,18 @@ func _process(event):
 			add_child(shot)
 			SoundManager.play_random_sound(SoundManager.fire)
 	
-	if Input.is_action_just_pressed("restart"):
-		var tut_node: = get_node_or_null("Tutorial")
-		if tut_node != null and tut_node.is_done():
-			get_tree().change_scene("res://Game.tscn")
-		else :
-			get_tree().reload_current_scene()
 	if Input.is_key_pressed(KEY_COMMA):
 		$Env.add_wall(Env.pos_to_coords($Target.position))
 		
 	if get_enemies().empty():
 		$Spawner.no_enemies()
+
+func restart():
+	var tut_node: = get_node_or_null("Tutorial")
+	if tut_node != null and tut_node.is_done():
+		get_tree().change_scene("res://Game.tscn")
+	else :
+		get_tree().reload_current_scene()
 
 func check_lose() -> bool:
 	if lost:
@@ -104,19 +107,19 @@ func _physics_process(delta):
 	for shot in shots:
 		if Utils.bernoulli(0.5):
 			create_shot_particle(shot.position)
+			
+		if $Env.has_wall_at(shot.position):
+			var wall = $Env.get_wall_at(shot.position)
+			if wall != null:
+				wall.position += shot.vel * 1
+			shot.destroy()
+			SoundManager.play_random_sound(SoundManager.hit)
+			continue
 	
 	for enemy in get_enemies():
 		if enemy.is_destroyed:
 			continue
 		for shot in shots:
-			if $Env.has_wall_at(shot.position):
-				var wall = $Env.get_wall_at(shot.position)
-				if wall != null:
-					wall.position += shot.vel * 1
-				shot.destroy()
-				SoundManager.play_random_sound(SoundManager.hit)
-				continue
-			
 			if (enemy.position - shot.position).length() < SHOT_RADIUS:
 				enemy.hit()
 				pause_effect()
@@ -165,7 +168,6 @@ func coin_taken(coin):
 	coin.queue_free()
 	
 func create_enemy(init_pos:Vector2, stationary:bool, type: = 0):
-	print("create_enemy, type=",type)
 	
 	var enemy_type_scene:PackedScene = preload("res://Enemy.tscn")
 	match type:
@@ -201,7 +203,6 @@ func check_circle():
 	var max_coords = $Env.get_max_coords()
 	# Check if we can get the center from outsde the box.
 	if $Env.get_first_reachable_corner().empty():
-		print("no reachable corners")
 		get_tree().paused = true
 		$Exploder.start()
 		$PauseEffectTimer.stop()
@@ -211,12 +212,13 @@ func check_circle():
 	return false
 	
 func _on_Enemy_destroyed(enemy):
-	var wall = $Env.add_wall_at(enemy.position)
+	var coords = Env.pos_to_coords(enemy.position)
+	var wall = $Env.add_wall(coords)
 	if wall != null:
 		wall.type = enemy.type
 	
 	for coin in get_coins():
-		if Env.pos_to_coords(coin.position) == Env.pos_to_coords(enemy.position):
+		if Env.pos_to_coords(coin.position) == coords:
 			create_gem_particles(coin)
 			coin.queue_free()
 			
@@ -229,9 +231,10 @@ func _on_Enemy_destroyed(enemy):
 	pause_effect()
 	
 	for e in get_tree().get_nodes_in_group("enemies"):
-		if e == enemy or Env.pos_to_coords(e.position) == Env.pos_to_coords(enemy.position):
+		if e == enemy or Env.pos_to_coords(e.position) == coords:
 			continue
-		e.calc_path()
+		e.refine_path(coords)
+		# e.calc_path()
 	
 func _on_Enemy_destroyed_no_wall(enemy):
 	#var colors: = ENEMY_COLORS if enemy.type == 0 else FAT_ENEMY_COLORS
@@ -247,7 +250,6 @@ func _on_Enemy_blocked(enemy):
 	pass
 
 func _on_Spawner_spawned(pos:Vector2, stationary:bool, type:int):
-	print("_on_Spawner_spawned type=", type)
 	if lost:
 		return
 	create_enemy(pos, stationary, type)
@@ -274,9 +276,15 @@ func create_wall_particles(pos:Vector2):
 	SoundManager.play_random_sound(SoundManager.breaking)
 
 func _on_PauseEffectTimer_timeout():
-	get_tree().paused = false
+	get_tree().paused = paused
 
 func _on_Exploder_done_expanding(expanded:Dictionary):
+	for e in get_tree().get_nodes_in_group("enemies"):
+		#if Env.pos_to_coords(e.position).length() < EXPLODE_RANGE:
+		# create_coin(e.position)
+		e.destroy_no_wall()
+		continue
+	
 	for coords in expanded.keys():
 		if $Env.has_wall(coords):
 			create_coin(Env.coords_to_pos(coords))
@@ -286,16 +294,7 @@ func _on_Exploder_done_expanding(expanded:Dictionary):
 			
 	$Spawner.next_level()
 	
-	get_tree().paused = false
-	
-	for e in get_tree().get_nodes_in_group("enemies"):
-		if Env.pos_to_coords(e.position).length() < EXPLODE_RANGE:
-			create_coin(e.position)
-			e.call_deferred("destroy_no_wall")
-			continue
-		
-		e.stopped = false
-		e.calc_path()
+	get_tree().paused = paused
 		
 	$Camera.screen_shake(1)
 

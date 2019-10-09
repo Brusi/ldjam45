@@ -25,6 +25,9 @@ func _process(delta):
 	
 	if screenshake_on:
 		offset = Utils.rand_dir() * 1
+		
+	position.x = round(position.x)
+	position.y = round(position.y)
 	
 func screen_shake(time:= 0.2):
 	if $ScreenShakeTimer.time_left >= time:
