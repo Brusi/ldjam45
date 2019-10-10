@@ -50,11 +50,6 @@ script = ExtResource( 7 )
 pause_mode = 2
 script = ExtResource( 8 )
 
-[node name="ExpandTimer" type="Timer" parent="Exploder"]
-pause_mode = 2
-wait_time = 0.1
-one_shot = true
-
 [node name="Player" parent="." instance=ExtResource( 9 )]
 position = Vector2( 0, -20 )
 
@@ -246,7 +241,6 @@ valign = 1
 pause_mode = 2
 script = ExtResource( 18 )
 [connection signal="done_expanding" from="Exploder" to="." method="_on_Exploder_done_expanding"]
-[connection signal="timeout" from="Exploder/ExpandTimer" to="Exploder" method="_on_ExpandTimer_timeout"]
 [connection signal="timeout" from="Camera/ScreenShakeTimer" to="Camera" method="_on_ScreenShakeTimer_timeout"]
 [connection signal="spawned" from="Spawner" to="." method="_on_Spawner_spawned"]
 [connection signal="timeout" from="Spawner/Timer" to="Spawner" method="_on_Timer_timeout"]

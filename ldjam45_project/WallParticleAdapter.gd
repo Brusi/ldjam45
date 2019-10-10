@@ -12,7 +12,3 @@ func _ready():
 	else:
 		sprite.texture = load("res://assets/wall_particles/wall_particle_"+String(randi()%2+7)+".png")
 	sprite.rotation_degrees = randi()%4 * 90
-
-# Called every frame. 'delta' is the elapsed time since the previous frame.
-#func _process(delta):
-#	pass

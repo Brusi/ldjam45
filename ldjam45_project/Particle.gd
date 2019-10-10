@@ -47,7 +47,3 @@ func _process(delta):
 		if scale.x <= 0.001:
 			queue_free()
 		
-
-# Called every frame. 'delta' is the elapsed time since the previous frame.
-#func _process(delta):
-#	pass

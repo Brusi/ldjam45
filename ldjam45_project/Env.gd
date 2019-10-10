@@ -4,6 +4,8 @@ class_name Env
 
 const SIZE = 20;
 
+export(bool) var show_debug_path: = false
+
 # Dictionary from Pos to Node.
 var tiles = {}
 
@@ -50,6 +52,7 @@ func init_stam():
 	add_wall(Vector2(-7, -2))
 
 func _ready():
+	dijkstra()
 	pass
 	
 func add_wall_at(pos:Vector2):
@@ -60,6 +63,11 @@ func add_wall_at(pos:Vector2):
 	return wall
 	
 func add_wall(coords:Vector2):
+	if max(abs(coords.x), abs(coords.y)) >= 10:
+		pass
+		# Do not allow walls outside premise.
+		#return null
+	
 	if coords == Vector2.ZERO:
 		return null
 
@@ -70,6 +78,9 @@ func add_wall(coords:Vector2):
 	wall.position = coords_to_pos(coords)
 	$"..".add_child(wall)
 	tiles[coords] = wall;
+	
+	dijkstra()
+	
 	return wall
 	
 func remove_wall(p:Vector2):
@@ -77,7 +88,6 @@ func remove_wall(p:Vector2):
 		return
 	tiles[p].queue_free();
 	tiles.erase(p)
-
 	
 static func pos_to_coords(vec:Vector2) -> Vector2:
 	var p: = Vector2(int(round(vec.x / SIZE)), int(round(vec.y / SIZE)))
@@ -87,7 +97,7 @@ static func coords_to_pos(p:Vector2) -> Vector2:
 	return Vector2(p.x, p.y) * SIZE;
 
 const MAX_OPEN_SET: = 1000
-const INFINITY: = 1000000
+const INFINITY: = 1000000.0
 
 static func find_key_with_min_value(keys:Array, dict:Dictionary):
 	var min_key = null;
@@ -105,53 +115,6 @@ func reconstruct_path(cameFrom, current):
         total_path.push_front(current)
     return total_path
 
-func astar(source:Vector2, target:Vector2 = Vector2(0,0), allow_skip: = false):
-	var openSet: = {source: false}
-	var cameFrom: = {}
-	var closedSet: = {}
-	
-	var gScore := {}
-	gScore[source] = 0
-	
-	var fScore := {}
-	fScore[source] = (source - target).length()
-	
-	var step: = 0
-
-	while not openSet.empty() and openSet.size() < MAX_OPEN_SET and step < 1000:
-		step += 1
-		
-		var current:Vector2 = find_key_with_min_value(openSet.keys(), fScore)
-
-		if current == target:
-			return reconstruct_path(cameFrom, current)
-		
-		openSet.erase(current)
-		closedSet[current] = false
-		
-		for rel in NEIGHBORS:
-			var neighbor:Vector2 = current + rel
-			
-			var can_go: = (allow_skip and not has_wall(neighbor)) or check_free_way(current, neighbor)
-			
-			if not can_go:
-				continue
-			#if tiles.has(neighbor):
-			#	continue
-			if closedSet.has(neighbor):
-				continue
-				
-			var tentative_gScore = gScore.get(current, INFINITY) + (current-neighbor).length()
-			if tentative_gScore < gScore.get(neighbor, INFINITY):
-				# print(neighbor, " came from ", current)
-				cameFrom[neighbor] = current
-				gScore[neighbor] = tentative_gScore
-				fScore[neighbor] = gScore[neighbor] + (neighbor - target).length()
-				# print("fScore[",neighbor,"]=",fScore[neighbor])
-				openSet[neighbor] = false
-	
-	return []
-	
 func check_free_path(path:Array) -> bool:
 	for i in range(path.size() - 1):
 		if not check_free_way(path[i], path[i+1]):
@@ -204,13 +167,70 @@ func get_corners() -> Array:
 			Vector2(min_coords.x - 1, max_coords.y + 1),
 			Vector2(max_coords.x + 1, min_coords.y - 1)]
 			
-func get_first_reachable_corner() -> Array:
-	var corners: = get_corners()
-	for coords in corners:
-		if not astar(coords).empty():
-			return [coords]
-	return []
+var parent: = {}
+var dist: = {}
+
+func get_min_dist_coords(dist:Dictionary, queue:Array) -> Vector2:
+	var min_dist: = INFINITY
+	var min_coords:Vector2
+	assert(not queue.empty())
+	for coords in queue:
+		assert (coords in dist)
+		var coords_dist:float = dist[coords]
+		if coords_dist < min_dist:
+			min_dist = coords_dist
+			min_coords = coords
+			
+	return min_coords
+			
+
+# Fills parent array with 'next target' for each tile coords.
+func dijkstra():
+	dist = {}
+	parent = {}
+	
+	dist[Vector2.ZERO] = 0.0
+	parent[Vector2.ZERO] = Vector2.ZERO
+	
+	var queue: = [Vector2.ZERO]
+	var done: = {}  # Actually a set.
+	
+	while not queue.empty():
+		var current: = get_min_dist_coords(dist, queue)
+		queue.erase(current)
+		done[current] = false  # Use it as set
+		
+		for rel in NEIGHBORS:
+			var neighbor:Vector2 = current + rel
+			if done.has(neighbor) or max(abs(neighbor.x), abs(neighbor.y)) > 10:
+				continue
+				
+			if not check_free_way(current, neighbor):
+				continue
+				
+			var new_dist:float = dist[current] + current.distance_to(neighbor)
+			
+			if not dist.has(neighbor):
+				queue.append(neighbor)
+			
+			if new_dist < dist.get(neighbor, INFINITY):
+				dist[neighbor] = new_dist
+				parent[neighbor] = current
+				
+	if show_debug_path:
+		update()
 	
 func _process(delta):
 	for wall in tiles.values():
 		wall.position = (wall.position + coords_to_pos(pos_to_coords(wall.position))) / 2
+
+func _draw():
+	if not show_debug_path:
+		return
+	for coords in parent.keys():
+		var source: = coords_to_pos(coords)
+		var target: = coords_to_pos(parent[coords])
+		var middle: = (source + target) / 2
+		draw_line(source, target, Color.white, false)
+		draw_line(middle, middle + (source-target).normalized().rotated(0.5) * 3, Color.white, false)
+		draw_line(middle, middle + (source-target).normalized().rotated(-0.5) * 3, Color.white, false)

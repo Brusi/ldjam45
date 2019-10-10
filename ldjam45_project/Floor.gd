@@ -48,7 +48,3 @@ func is_used(i:int, j:int) -> bool:
 	if i > size or j > size:
 		return true
 	return used.has(Vector2(i,j))
-
-# Called every frame. 'delta' is the elapsed time since the previous frame.
-#func _process(delta):
-#	pass

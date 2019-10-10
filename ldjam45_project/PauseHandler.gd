@@ -23,7 +23,3 @@ func _unhandled_input(event):
 	if event is InputEventMouse and event.is_pressed() and event.button_index == BUTTON_LEFT:
 		$"..".paused = false
 		get_tree().paused = false
-
-# Called every frame. 'delta' is the elapsed time since the previous frame.
-#func _process(delta):
-#	pass

@@ -36,6 +36,8 @@ func _ready():
 	MusicPlayer._play_current()
 
 func _process(event):
+	check_circle()
+	
 	if not lost and Input.is_mouse_button_pressed(BUTTON_LEFT):
 		if $ShotsTimer.time_left <= 0:
 			$ShotsTimer.start()
@@ -47,7 +49,15 @@ func _process(event):
 			SoundManager.play_random_sound(SoundManager.fire)
 	
 	if Input.is_key_pressed(KEY_COMMA):
-		$Env.add_wall(Env.pos_to_coords($Target.position))
+		$Env.add_wall_at($Target.position)
+	
+	elif Input.is_key_pressed(KEY_PERIOD):
+		var should_create: = true
+		for enemy in get_enemies():
+			if $Target.position.distance_to(enemy.position) < Env.SIZE:
+				should_create = false
+		if should_create:
+			create_enemy($Target.position, false, 0)
 		
 	if get_enemies().empty():
 		$Spawner.no_enemies()
@@ -137,17 +147,19 @@ func _physics_process(delta):
 		if enemy.is_destroyed:
 			continue
 		var coords:Vector2 = enemy.coords()
-		if not enemy.skipper and $Env.tiles.has(enemy.coords()):
+		if $Env.tiles.has(enemy.coords()):
 			$Env.remove_wall(coords)
+			$Env.dijkstra()
 			enemy.destroy_no_wall()
 			create_wall_particles(Env.coords_to_pos(coords))
+			
 			
 	for coin in get_coins():
 		if coin.position.distance_to($Player.position) < Env.SIZE * 2:
 			coin.position += ($Player.position - coin.position) / 10
 		if coin.position.distance_to($Player.position) < Env.SIZE:
 			coin_taken(coin)
-			pause_effect(0.05)
+			pause_effect(0.02)
 			
 func show_score():
 	$UI/Control/ScoreView.visible = true
@@ -178,7 +190,6 @@ func create_enemy(init_pos:Vector2, stationary:bool, type: = 0):
 	# enemy_type_scene = preload("res://ThinEnemy.tscn")
 	var enemy:Enemy = (enemy_type_scene).instance()
 	enemy.position = init_pos
-	enemy.prev_target = init_pos
 	enemy.stationary = stationary
 	enemy.connect("destroyed", self, "_on_Enemy_destroyed")
 	enemy.connect("destroyed_no_wall", self, "_on_Enemy_destroyed_no_wall")
@@ -199,6 +210,9 @@ func _on_Shot_destroyed(shot:Node2D) -> void:
 	shot.queue_free()
 	
 func check_circle():
+	$Exploder.start()
+	return
+	
 	var min_coords = $Env.get_min_coords()
 	var max_coords = $Env.get_max_coords()
 	# Check if we can get the center from outsde the box.
@@ -213,9 +227,11 @@ func check_circle():
 	
 func _on_Enemy_destroyed(enemy):
 	var coords = Env.pos_to_coords(enemy.position)
-	var wall = $Env.add_wall(coords)
+	var wall = $Env.add_wall_at(enemy.position)
 	if wall != null:
 		wall.type = enemy.type
+	else:
+		create_wall_particles(enemy.position)
 	
 	for coin in get_coins():
 		if Env.pos_to_coords(coin.position) == coords:
@@ -224,18 +240,9 @@ func _on_Enemy_destroyed(enemy):
 			
 	enemy.queue_free()
 			
-	if check_circle():
-		return
-	
 	$Camera.screen_shake()
 	pause_effect()
-	
-	for e in get_tree().get_nodes_in_group("enemies"):
-		if e == enemy or Env.pos_to_coords(e.position) == coords:
-			continue
-		e.refine_path(coords)
-		# e.calc_path()
-	
+
 func _on_Enemy_destroyed_no_wall(enemy):
 	#var colors: = ENEMY_COLORS if enemy.type == 0 else FAT_ENEMY_COLORS
 	#create_particles(enemy.position, colors, 100)
@@ -254,7 +261,7 @@ func _on_Spawner_spawned(pos:Vector2, stationary:bool, type:int):
 		return
 	create_enemy(pos, stationary, type)
 
-func pause_effect(wait_time: = 0.1):
+func pause_effect(wait_time: = 0.05):
 	$PauseEffectTimer.start(wait_time)
 	get_tree().paused = true
 	
@@ -292,7 +299,9 @@ func _on_Exploder_done_expanding(expanded:Dictionary):
 			
 			create_wall_particles(Env.coords_to_pos(coords))
 			
+	$Env.dijkstra()
 	$Spawner.next_level()
+	SoundManager.play_random_sound(SoundManager.breaking)
 	
 	get_tree().paused = paused
 		

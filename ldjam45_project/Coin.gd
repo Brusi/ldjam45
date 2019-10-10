@@ -29,10 +29,6 @@ func _process(delta):
 	position += vel * delta
 	$Sprite.position.y = -z
 
-# Called every frame. 'delta' is the elapsed time since the previous frame.
-#func _process(delta):
-#	pass
-
 func _on_TimeoutTimer_timeout():
 	queue_free()
 

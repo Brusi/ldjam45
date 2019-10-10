@@ -15,6 +15,7 @@ var on: = true
 # Called when the node enters the scene tree for the first time.
 func _ready():
 	create_stream(fire).volume_db = -6
+	pause_mode = PAUSE_MODE_PROCESS
 	pass # Replace with function body.
 	
 func _process(delta):
